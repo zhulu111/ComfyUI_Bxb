@@ -13,6 +13,7 @@ import sys
 import re
 import hashlib
 import platform
+import stat
 
 def get_mac_address():
     mac = uuid.getnode()
@@ -43,12 +44,23 @@ def generate_unique_subdomain(mac_address, port):
     subdomain = hash_object.hexdigest()[:12]
     return subdomain
 
+def set_executable_permission(file_path):
+    if platform.system() != "Windows":  # Only modify permissions on non-Windows platforms
+        try:
+            st = os.stat(file_path)
+            os.chmod(file_path, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            print(f"Execution permissions set on {file_path}")
+        except Exception as e:
+            print(f"Failed to set execution permissions: {e}")
+    else:
+        print("Permission setting skipped on Windows")
+
 # 获取插件的绝对路径
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 设置 sd_client 目录下的文件路径
 SD_CLIENT_DIR = os.path.join(PLUGIN_DIR, "sdc")
-SDC_EXECUTABLE = os.path.join(SD_CLIENT_DIR, "sdc.exe")
+SDC_EXECUTABLE = os.path.join(SD_CLIENT_DIR, "sdc" if platform.system() != "Windows" else "sdc.exe")
 INI_FILE = os.path.join(SD_CLIENT_DIR, "sdc.ini")
 LOG_FILE = os.path.join(SD_CLIENT_DIR, "sdc.log")
 
@@ -123,11 +135,20 @@ log_level = info
     def start(self):
         """启动 SD 客户端"""
         self.create_sdc_ini(INI_FILE, self.subdomain)
+        set_executable_permission(SDC_EXECUTABLE)
 
         # 清空或创建日志文件
         open(LOG_FILE, "w").close()
 
+        # 保存当前的环境变量
+        old_http_proxy = os.environ.get('http_proxy')
+        old_https_proxy = os.environ.get('https_proxy')
+
         try:
+            # 清除可能影响 FRP 客户端的代理环境变量
+            os.environ['http_proxy'] = ''
+            os.environ['https_proxy'] = ''
+
             # 启动 sdc 并重定向输出到日志文件
             with open(LOG_FILE, "a") as log_file:
                 self.sd_process = subprocess.Popen([SDC_EXECUTABLE, "-c", INI_FILE], stdout=log_file, stderr=log_file)
@@ -142,6 +163,12 @@ log_level = info
             print(f"Error: '{SDC_EXECUTABLE}' not found。")
         except Exception as e:
             print(f"Error starting SD client: {e}")
+        finally:
+            # 恢复原有的环境变量
+            if old_http_proxy is not None:
+                os.environ['http_proxy'] = old_http_proxy
+            if old_https_proxy is not None:
+                os.environ['https_proxy'] = old_https_proxy
 
     def monitor_connection_status(self):
         """监测 SD 连接状态"""
