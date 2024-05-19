@@ -69,7 +69,7 @@ PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
 # 设置 sd_client 目录下的文件路径
 SD_CLIENT_DIR = os.path.join(PLUGIN_DIR, "sdc")
 SDC_EXECUTABLE = os.path.join(SD_CLIENT_DIR, "sdc" if platform.system() != "Windows" else "sdc.exe")
-INI_FILE = os.path.join(SD_CLIENT_DIR, "sdc.ini")
+INI_FILE = os.path.join(SD_CLIENT_DIR, "sdc.toml")
 LOG_FILE = os.path.join(SD_CLIENT_DIR, "sdc.log")
 
 
@@ -88,21 +88,21 @@ class SDClient:
         self.stop_monitoring = False
 
     def create_sdc_ini(self, file_path, subdomain):
-        """生成 sdc.ini 文件"""
+        """生成 sdc.toml 文件"""
         config_content = f"""
 [common]
-server_addr = {self.server_addr}
+server_addr = "{self.server_addr}"
 server_port = {self.server_port}
-token = {self.token}
+token = "{self.token}"
 login_fail_exit = false
 
 [{subdomain}]
-type = http
+type = "http"
 local_port = {self.local_port}
-subdomain = {subdomain}
+subdomain = "{subdomain}"
 remote_port = 0
-log_file = {LOG_FILE}
-log_level = info
+log_file = "{LOG_FILE}"
+log_level = "info"
 """
         with open(file_path, "w") as config_file:
             config_file.write(config_content)
