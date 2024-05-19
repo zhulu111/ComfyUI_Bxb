@@ -140,18 +140,16 @@ log_level = info
         # 清空或创建日志文件
         open(LOG_FILE, "w").close()
 
-        # 保存当前的环境变量
-        old_http_proxy = os.environ.get('http_proxy')
-        old_https_proxy = os.environ.get('https_proxy')
+        # 创建一个环境变量字典，清除代理设置
+        env1 = os.environ.copy()
+        env1['http_proxy'] = ''
+        env1['https_proxy'] = ''
+        env1['no_proxy'] = '*'  # 添加无代理配置
 
         try:
-            # 清除可能影响 FRP 客户端的代理环境变量
-            os.environ['http_proxy'] = ''
-            os.environ['https_proxy'] = ''
-
             # 启动 sdc 并重定向输出到日志文件
             with open(LOG_FILE, "a") as log_file:
-                self.sd_process = subprocess.Popen([SDC_EXECUTABLE, "-c", INI_FILE], stdout=log_file, stderr=log_file)
+                self.sd_process = subprocess.Popen([SDC_EXECUTABLE, "-c", INI_FILE], stdout=log_file, stderr=log_file, env=env1)
             print(f"SD client started with PID: {self.sd_process.pid}")
 
             # 启动监控线程
@@ -163,12 +161,6 @@ log_level = info
             print(f"Error: '{SDC_EXECUTABLE}' not found。")
         except Exception as e:
             print(f"Error starting SD client: {e}")
-        finally:
-            # 恢复原有的环境变量
-            if old_http_proxy is not None:
-                os.environ['http_proxy'] = old_http_proxy
-            if old_https_proxy is not None:
-                os.environ['https_proxy'] = old_https_proxy
 
     def monitor_connection_status(self):
         """监测 SD 连接状态"""
