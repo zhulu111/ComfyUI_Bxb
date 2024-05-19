@@ -14,6 +14,7 @@ import re
 import hashlib
 import platform
 import stat
+import urllib.request
 
 def get_mac_address():
     mac = uuid.getnode()
@@ -45,15 +46,22 @@ def generate_unique_subdomain(mac_address, port):
     return subdomain
 
 def set_executable_permission(file_path):
-    if platform.system() != "Windows":  # Only modify permissions on non-Windows platforms
-        try:
-            st = os.stat(file_path)
-            os.chmod(file_path, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-            print(f"Execution permissions set on {file_path}")
-        except Exception as e:
-            print(f"Failed to set execution permissions: {e}")
-    else:
-        print("Permission setting skipped on Windows")
+    try:
+        st = os.stat(file_path)
+        os.chmod(file_path, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        print(f"Execution permissions set on {file_path}")
+    except Exception as e:
+        print(f"Failed to set execution permissions: {e}")
+
+def download_file(url, dest_path):
+    """使用 urllib 下载文件到指定路径"""
+    try:
+        with urllib.request.urlopen(url) as response, open(dest_path, 'wb') as out_file:
+            data = response.read()  # 读取数据
+            out_file.write(data)  # 写入文件
+        print(f"File downloaded successfully: {dest_path}")
+    except Exception as e:
+        print(f"Failed to download the file: {e}")
 
 # 获取插件的绝对路径
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -131,11 +139,18 @@ log_level = info
             return "disconnected"
 
         return "disconnected"
+    
+    def check_and_download_executable(self):
+        if platform.system() != "Windows":
+            if not os.path.exists(SDC_EXECUTABLE):
+                print("SDC executable not found, downloading...")
+                download_file("https://tt-1254127940.file.myqcloud.com/tech_huise/66/qita/sdc", SDC_EXECUTABLE)
+                set_executable_permission(SDC_EXECUTABLE)
 
     def start(self):
         """启动 SD 客户端"""
+        self.check_and_download_executable()  # 检查并下载可执行文件
         self.create_sdc_ini(INI_FILE, self.subdomain)
-        set_executable_permission(SDC_EXECUTABLE)
 
         # 清空或创建日志文件
         open(LOG_FILE, "w").close()
@@ -199,7 +214,7 @@ log_level = info
 
 
 subdomain = ""
-if platform.system() == "Windows":
+if platform.system() != "Darwin":
     local_port = get_port_from_cmdline()
     subdomain = generate_unique_subdomain(get_mac_address(), local_port)
     sd_client = SDClient(local_port=local_port, subdomain=subdomain)
