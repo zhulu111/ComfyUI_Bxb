@@ -35,7 +35,7 @@ def get_port_from_cmdline():
             except ValueError:
                 pass
 
-    # 如果命令行参数中未找到端口号，则返回默认端口号
+    # 如果命令行参数中未找到端口号，则返回默认端口号8188
     return 8188
 
 def generate_unique_subdomain(mac_address, port):
