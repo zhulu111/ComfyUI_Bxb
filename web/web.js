@@ -1,1 +1,522 @@
-const _0x44db5c=_0x5b54;(function(_0x3f53fc,_0x45b3d2){const _0x4fe4c5=_0x5b54,_0x4a7917=_0x3f53fc();while(!![]){try{const _0x4b1b30=-parseInt(_0x4fe4c5(0x1e4))/0x1+-parseInt(_0x4fe4c5(0x233))/0x2*(parseInt(_0x4fe4c5(0x22f))/0x3)+-parseInt(_0x4fe4c5(0x1eb))/0x4+-parseInt(_0x4fe4c5(0x1f1))/0x5+-parseInt(_0x4fe4c5(0x235))/0x6+-parseInt(_0x4fe4c5(0x219))/0x7+parseInt(_0x4fe4c5(0x1e9))/0x8*(parseInt(_0x4fe4c5(0x1d4))/0x9);if(_0x4b1b30===_0x45b3d2)break;else _0x4a7917['push'](_0x4a7917['shift']());}catch(_0x5e11b1){_0x4a7917['push'](_0x4a7917['shift']());}}}(_0x3e51,0x951d2));import{app}from'../../../scripts/app.js';import{api}from'../../../scripts/api.js';import{ComfyWidgets}from'../../../scripts/widgets.js';import{$el}from'../../../scripts/ui.js';const styleElement=document[_0x44db5c(0x1f2)](_0x44db5c(0x1e6)),cssCode=_0x44db5c(0x234);styleElement[_0x44db5c(0x1bd)]=cssCode,document[_0x44db5c(0x212)]['appendChild'](styleElement);var techsidkey=_0x44db5c(0x21d)+window[_0x44db5c(0x1da)][_0x44db5c(0x206)],loading=![];function _0x5b54(_0x28be5d,_0x4f9b79){const _0x3e510d=_0x3e51();return _0x5b54=function(_0x5b5457,_0x3a7c0d){_0x5b5457=_0x5b5457-0x1b6;let _0x2ecb58=_0x3e510d[_0x5b5457];return _0x2ecb58;},_0x5b54(_0x28be5d,_0x4f9b79);}const msgBox=$el(_0x44db5c(0x1c2),{'parent':document[_0x44db5c(0x20a)]},[]),msgDiv=$el(_0x44db5c(0x22b),{'id':_0x44db5c(0x1ff)},'');msgBox[_0x44db5c(0x1bb)](msgDiv),msgBox[_0x44db5c(0x1e6)][_0x44db5c(0x23f)]='none',msgBox[_0x44db5c(0x1e6)][_0x44db5c(0x202)]=0x2711;function setCookie(_0x395738,_0x4d637f,_0x35ff59=0x1){const _0x504f7e=_0x44db5c;var _0x6693f7='';if(_0x35ff59){var _0x3f8f69=new Date();_0x3f8f69[_0x504f7e(0x20d)](_0x3f8f69[_0x504f7e(0x1d0)]()+_0x35ff59*0x18*0x3c*0x3c*0x3e8),_0x6693f7=_0x504f7e(0x1ee)+_0x3f8f69[_0x504f7e(0x242)]();}document[_0x504f7e(0x1e3)]=_0x395738+'='+(_0x4d637f||'')+_0x6693f7+';\x20path=/';}function getCookie(_0x345b93){const _0x15f00d=_0x44db5c;var _0x3d52fb=_0x345b93+'=',_0x5e7674=document['cookie']['split'](';');for(var _0x55f48a=0x0;_0x55f48a<_0x5e7674['length'];_0x55f48a++){var _0x26e600=_0x5e7674[_0x55f48a];while(_0x26e600['charAt'](0x0)=='\x20')_0x26e600=_0x26e600[_0x15f00d(0x226)](0x1,_0x26e600[_0x15f00d(0x22d)]);if(_0x26e600[_0x15f00d(0x1be)](_0x3d52fb)==0x0)return _0x26e600[_0x15f00d(0x226)](_0x3d52fb['length'],_0x26e600[_0x15f00d(0x22d)]);}return'';}function generateTimestampedRandomString(){const _0x5b1af1=_0x44db5c,_0x3afcf1=Date[_0x5b1af1(0x216)]()[_0x5b1af1(0x213)](),_0x1842cc=Math['random']()[_0x5b1af1(0x213)](0x24)[_0x5b1af1(0x226)](0x2,0x12),_0x3a674d=(_0x3afcf1+_0x1842cc)[_0x5b1af1(0x226)](0x0,0x20);return _0x3a674d;}function showLoading(_0xc01842=''){const _0x598962=_0x44db5c;hideLoading(),msgDiv[_0x598962(0x211)]=_0xc01842?_0xc01842:_0x598962(0x1ce),msgBox['style'][_0x598962(0x23f)]='block',loading=!![];}function hideLoading(){const _0x46d32b=_0x44db5c;msgBox['style'][_0x46d32b(0x23f)]=_0x46d32b(0x225),loading=![];}function showToast(_0x275693='',_0x366d3c=0x0){const _0x5369c9=_0x44db5c;_0x366d3c=_0x366d3c>0x0?_0x366d3c:0x7d0,msgDiv[_0x5369c9(0x211)]=_0x275693?_0x275693:'谢谢',msgBox[_0x5369c9(0x1e6)][_0x5369c9(0x23f)]='block',setTimeout(()=>{const _0x4f6ee0=_0x5369c9;msgBox[_0x4f6ee0(0x1e6)]['display']=_0x4f6ee0(0x225);},_0x366d3c);}var serverUrl=window[_0x44db5c(0x1da)]['href'];const qrCode=$el('img',{'id':'qrCode','src':'','onerror':()=>{}}),qrDesc=$el(_0x44db5c(0x22b),{'id':_0x44db5c(0x21a)},_0x44db5c(0x1cc)),qrBox=$el(_0x44db5c(0x22b),{'id':_0x44db5c(0x1cb)},[qrCode,qrDesc]);app['ui'][_0x44db5c(0x1f8)]['element']['style'][_0x44db5c(0x202)]=0x271a;const showMsgDiv=$el(_0x44db5c(0x22b),{'id':_0x44db5c(0x1d5)},_0x44db5c(0x1ce));function showCodeBox(_0x20f555){const _0x28ad6b=_0x44db5c;app['ui'][_0x28ad6b(0x1f8)][_0x28ad6b(0x1d2)]();let _0x24c483=[];for(let _0x32ffa6=0x0;_0x32ffa6<_0x20f555[_0x28ad6b(0x22d)];_0x32ffa6++){_0x24c483[_0x28ad6b(0x1fe)]($el(_0x28ad6b(0x1ba),{},[$el(_0x28ad6b(0x1b9),{'src':_0x20f555[_0x32ffa6][_0x28ad6b(0x208)]}),$el(_0x28ad6b(0x215),{},_0x20f555[_0x32ffa6][_0x28ad6b(0x1e0)])]));}const _0x1b9aee=$el(_0x28ad6b(0x1f0),{},_0x24c483);app['ui']['dialog'][_0x28ad6b(0x224)](_0x1b9aee);}function showQrBox(_0x729259,_0x3c52f4){const _0x4ce2cd=_0x44db5c;app['ui'][_0x4ce2cd(0x1f8)][_0x4ce2cd(0x1d2)](),qrDesc[_0x4ce2cd(0x211)]=_0x3c52f4,qrCode[_0x4ce2cd(0x1e8)]=_0x729259,app['ui'][_0x4ce2cd(0x1f8)][_0x4ce2cd(0x224)](qrBox);}function _0x3e51(){const _0xd8103e=['作品主图只可以连接“加载图像”节点','cs_img1_desc','push','msgDiv','请填写作品使用说明','cs_img_nodes','zIndex','graphToPrompt','cs_text1','用户自定义文本1（连接“文本输入”节点，可选）','port','作品服务单价不能小于0.1元','code','自定义文本2输入说明','body','undefined','class_type','setTime','message','gn_desc','cs_img2_desc','innerText','head','toString','请确保工作流中有且仅有1个“SaveImgae”或“保存图像”节点，目前有','div.codeDesc','now','setAttribute','cs_img3_desc','5305713yvQpyK','qrDesc','cs_img2','cs_text3','techsid','zhutus','获取api数据失败','inputs','1、每创建一个新的“SD变现宝”节点，就对应一个新的作品；','uniqueid','zhanwei','show','none','substring','请填写作品功能介绍','image','2、如有问题，请加入SD变现宝商家QQ群：967073981','处理中，请稍后...','div','res_node','length','cs_text1_desc','4359ognRDZ','作品主图1（连接“加载图像”节点，可选）','cs_text2_desc','element','796CTaVlb','\x0a\x20\x20\x20\x20#msgDiv{\x0a\x20\x20\x20\x20\x20\x20width:800px;\x0a\x20\x20\x20\x20\x20\x20height:\x20200px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20font-size:\x2030px;\x0a\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20align-items:\x20center;\x0a\x20\x20\x20\x20\x20\x20justify-content:\x20center;\x0a\x20\x20\x20\x20\x20\x20padding-bottom:\x2040px;\x0a\x20\x20\x20\x20\x20\x20color:\x20var(--fg-color);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#qrCode{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20width:256px;\x0a\x20\x20\x20\x20\x20\x20height:256px;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#qrBox{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20display:flex;\x0a\x20\x20\x20\x20\x20\x20flex-wrap:\x20wrap;\x0a\x20\x20\x20\x20\x20\x20justify-content:\x20center;\x0a\x20\x20\x20\x20\x20\x20width:\x20360px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#qrDesc{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20margin-top:\x2020px;\x0a\x20\x20\x20\x20\x20\x20color:\x20#ffffff;\x0a\x20\x20\x20\x20\x20\x20width:\x20360px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.codeImg\x20{\x0a\x20\x20\x20\x20\x20\x20//\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20width:256px;\x0a\x20\x20\x20\x20\x20\x20height:256px;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20\x20\x20padding:\x2010px;\x0a\x20\x20\x20\x20\x20\x20border:\x202px\x20solid\x20#ffffff;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.codeDesc\x20{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20margin-top:\x2020px;\x0a\x20\x20\x20\x20\x20\x20color:\x20#ffffff;\x0a\x20\x20\x20\x20\x20\x20width:\x20360px;\x0a\x20\x20\x20\x20\x20\x20font-size:\x2016px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.codeDiv\x20{\x0a\x20\x20\x20\x20\x20\x20color:\x20#ffffff;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.codeBox\x20{\x0a\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#directions{\x0a\x20\x20\x20\x20\x20\x20margin-top:\x2010px;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20left;\x0a\x20\x20\x20\x20\x20\x20color:\x20#ffffff;\x0a\x20\x20\x20\x20\x20\x20font-size:\x208px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.tech_button\x20{\x0a\x20\x20\x20\x20\x20\x20flex:1;\x0a\x20\x20\x20\x20\x20\x20height:30px;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x208px;\x0a\x20\x20\x20\x20\x20\x20border:\x202px\x20solid\x20var(--border-color);\x0a\x20\x20\x20\x20\x20\x20font-size:11px;\x0a\x20\x20\x20\x20\x20\x20background:var(--comfy-input-bg);\x0a\x20\x20\x20\x20\x20\x20color:var(--error-text);\x0a\x20\x20\x20\x20\x20\x20box-shadow:none;\x0a\x20\x20\x20\x20\x20\x20cursor:pointer;\x0a\x20\x20\x20\x20\x20\x20width:\x201rem;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#tech_box\x20{\x0a\x20\x20\x20\x20\x20\x20max-height:\x2080px;\x0a\x20\x20\x20\x20\x20\x20display:flex;\x0a\x20\x20\x20\x20\x20\x20flex-wrap:\x20wrap;\x0a\x20\x20\x20\x20\x20\x20align-items:\x20flex-start;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.uniqueid\x20{\x0a\x20\x20\x20\x20\x20\x20display:\x20none;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20#showMsgDiv\x20{\x0a\x20\x20\x20\x20\x20\x20width:800px;\x0a\x20\x20\x20\x20\x20\x20padding:\x2060px\x200;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20font-size:\x2030px;\x0a\x20\x20\x20\x20\x20\x20color:\x20var(--fg-color);\x0a\x20\x20\x20\x20}\x0a','2049552ReWlrW','directions','cs_img1','POST','作品主图3（连接“加载图像”节点，可选）','comfyui.index.code','自定义文本3输入说明','自定义图片3上传说明','btn','widgets','display','onNodeCreated','list','toUTCString','zhutu3','text','output','img.codeImg','div.codeDiv','appendChild','zhutu1','innerHTML','indexOf','uedynamiclist','点此，工作流转小程序，并获取访问地址','select_styles','div.comfy-modal','server','作品主图2（连接“加载图像”节点，可选）','zhutu2','用户自定义文本3（连接“文本输入”节点，可选）','addDOMWidget','application/json','sdBxb','name','qrBox','请用微信扫码，验证身份...','tech_box','请稍后...','cs_img3','getTime','prototype','close','网络连接出错，请保持电脑联网','17686935hafbiH','showMsgDiv','title','setSize','cs_text3_desc','data','location','sy_desc','apply','LoadImage','自定义文本1输入说明','cs_text2','desc','用户自定义图片只可以连接“加载图像”节点','stringify','cookie','439832KxaFwP','input','style','cs_text_nodes','src','16HNOtsJ','用户自定义图片3（连接“加载图像”节点，可选）','4571524smfNUM','作品服务单价（分）','特殊说明：',';\x20expires=','作品使用说明','div.codeBox','295510YXynQw','createElement','value','/manager/tech_zhulu','fee','用户自定义文本2（连接“文本输入”节点，可选）','SaveImage','dialog','用户自定义图片1（连接“加载图像”节点，可选）','findIndex','errno'];_0x3e51=function(){return _0xd8103e;};return _0x3e51();}function hideCodeBox(){const _0x3177c5=_0x44db5c;app['ui']['dialog'][_0x3177c5(0x1d2)]();}function showMsg(_0x4b6cea){const _0x24e10d=_0x44db5c;app['ui']['dialog'][_0x24e10d(0x1d2)](),showMsgDiv[_0x24e10d(0x211)]=_0x4b6cea,app['ui'][_0x24e10d(0x1f8)][_0x24e10d(0x224)](showMsgDiv);}function hideMsg(){app['ui']['dialog']['close']();}function tech_alert(_0x12d0ca){loading=![],showMsg(_0x12d0ca);}function getPostData(_0x4dc776){const _0x5eb330=_0x44db5c,_0x765807=_0x4dc776['output'];let _0xb2124c=0x0,_0x56bea2={},_0x38cabb={},_0x1e44e4={},_0xd498f=[];for(const _0xe4e676 in _0x765807){_0x765807[_0xe4e676][_0x5eb330(0x20c)]==_0x5eb330(0x1c9)&&(_0x56bea2=_0x765807[_0xe4e676][_0x5eb330(0x220)],_0xb2124c++),_0x765807[_0xe4e676][_0x5eb330(0x20c)]==_0x5eb330(0x1f7)&&(_0x765807[_0xe4e676]['res_node']=_0xe4e676,_0xd498f[_0x5eb330(0x1fe)](_0x765807[_0xe4e676]));}if(_0xb2124c>0x1)return'工作流中只可以存在1个“SD变现宝”节点';if(_0xd498f[_0x5eb330(0x22d)]<0x1)return _0x5eb330(0x214)+_0xd498f[_0x5eb330(0x22d)]+'个';else{if(_0xd498f[_0x5eb330(0x22d)]>0x1)return _0x5eb330(0x214)+_0xd498f[_0x5eb330(0x22d)]+'个';else _0x1e44e4[_0x5eb330(0x22c)]=_0xd498f[0x0][_0x5eb330(0x22c)];}if(_0x56bea2){_0x38cabb[_0x5eb330(0x1bc)]=_0x56bea2[_0x5eb330(0x230)],_0x38cabb[_0x5eb330(0x1c5)]=_0x56bea2[_0x5eb330(0x1c4)],_0x38cabb[_0x5eb330(0x1b6)]=_0x56bea2[_0x5eb330(0x239)],_0x38cabb[_0x5eb330(0x237)]=_0x56bea2[_0x5eb330(0x1f9)],_0x38cabb[_0x5eb330(0x21b)]=_0x56bea2['用户自定义图片2（连接“加载图像”节点，可选）'],_0x38cabb['cs_img3']=_0x56bea2[_0x5eb330(0x1ea)],_0x38cabb[_0x5eb330(0x204)]=_0x56bea2[_0x5eb330(0x205)],_0x38cabb[_0x5eb330(0x1df)]=_0x56bea2[_0x5eb330(0x1f6)],_0x38cabb['cs_text3']=_0x56bea2[_0x5eb330(0x1c6)],_0x38cabb[_0x5eb330(0x1d6)]=_0x56bea2['作品标题'],_0x38cabb[_0x5eb330(0x20f)]=_0x56bea2['作品功能介绍'],_0x38cabb['sy_desc']=_0x5eb330(0x1ef),_0x38cabb[_0x5eb330(0x1c3)]=serverUrl,_0x38cabb[_0x5eb330(0x1f5)]=_0x56bea2[_0x5eb330(0x1ec)],_0x38cabb[_0x5eb330(0x1fd)]=_0x56bea2['自定义图片1上传说明'],_0x38cabb[_0x5eb330(0x210)]=_0x56bea2['自定义图片2上传说明'],_0x38cabb[_0x5eb330(0x218)]=_0x56bea2[_0x5eb330(0x23c)],_0x38cabb[_0x5eb330(0x22e)]=_0x56bea2[_0x5eb330(0x1de)],_0x38cabb[_0x5eb330(0x231)]=_0x56bea2[_0x5eb330(0x209)],_0x38cabb[_0x5eb330(0x1d8)]=_0x56bea2[_0x5eb330(0x23b)],_0x38cabb[_0x5eb330(0x222)]=_0x56bea2[_0x5eb330(0x222)],_0x1e44e4['zhutus']=[];if(_0x38cabb['zhutu1']){if(_0x765807[_0x38cabb[_0x5eb330(0x1bc)][0x0]][_0x5eb330(0x20c)]=='LoadImage')_0x765807[_0x38cabb['zhutu1'][0x0]][_0x5eb330(0x220)][_0x5eb330(0x228)]&&_0x1e44e4[_0x5eb330(0x21e)][_0x5eb330(0x1fe)](_0x765807[_0x38cabb[_0x5eb330(0x1bc)][0x0]][_0x5eb330(0x220)][_0x5eb330(0x228)]);else return _0x5eb330(0x1fc);}if(_0x38cabb[_0x5eb330(0x1c5)]){if(_0x765807[_0x38cabb['zhutu2'][0x0]][_0x5eb330(0x20c)]=='LoadImage')_0x765807[_0x38cabb[_0x5eb330(0x1c5)][0x0]]['inputs'][_0x5eb330(0x228)]&&_0x1e44e4[_0x5eb330(0x21e)]['push'](_0x765807[_0x38cabb[_0x5eb330(0x1c5)][0x0]]['inputs'][_0x5eb330(0x228)]);else return'作品主图只可以连接“加载图像”节点';}if(_0x38cabb['zhutu3']){if(_0x765807[_0x38cabb[_0x5eb330(0x1b6)][0x0]][_0x5eb330(0x20c)]==_0x5eb330(0x1dd))_0x765807[_0x38cabb[_0x5eb330(0x1b6)][0x0]][_0x5eb330(0x220)]['image']&&_0x1e44e4[_0x5eb330(0x21e)]['push'](_0x765807[_0x38cabb[_0x5eb330(0x1b6)][0x0]]['inputs'][_0x5eb330(0x228)]);else return'作品主图只可以连接“加载图像”节点';}_0x1e44e4[_0x5eb330(0x201)]=[];if(_0x38cabb[_0x5eb330(0x237)]){if(_0x765807[_0x38cabb[_0x5eb330(0x237)][0x0]][_0x5eb330(0x20c)]==_0x5eb330(0x1dd))_0x1e44e4[_0x5eb330(0x201)]['push']({'node':_0x38cabb[_0x5eb330(0x237)][0x0],'desc':_0x38cabb['cs_img1_desc']});else return _0x5eb330(0x1e1);}if(_0x38cabb[_0x5eb330(0x21b)]){if(_0x765807[_0x38cabb[_0x5eb330(0x21b)][0x0]][_0x5eb330(0x20c)]==_0x5eb330(0x1dd))_0x1e44e4[_0x5eb330(0x201)][_0x5eb330(0x1fe)]({'node':_0x38cabb[_0x5eb330(0x21b)][0x0],'desc':_0x38cabb[_0x5eb330(0x210)]});else return _0x5eb330(0x1e1);}if(_0x38cabb[_0x5eb330(0x1cf)]){if(_0x765807[_0x38cabb['cs_img3'][0x0]]['class_type']==_0x5eb330(0x1dd))_0x1e44e4[_0x5eb330(0x201)][_0x5eb330(0x1fe)]({'node':_0x38cabb['cs_img3'][0x0],'desc':_0x38cabb[_0x5eb330(0x218)]});else return _0x5eb330(0x1e1);}_0x1e44e4[_0x5eb330(0x1e7)]=[];if(_0x38cabb['cs_text1']){if(typeof _0x765807[_0x38cabb['cs_text1'][0x0]][_0x5eb330(0x220)]!==_0x5eb330(0x20b)&&typeof _0x765807[_0x38cabb[_0x5eb330(0x204)][0x0]][_0x5eb330(0x220)][_0x5eb330(0x1b7)]!==_0x5eb330(0x20b))_0x1e44e4['cs_text_nodes'][_0x5eb330(0x1fe)]({'node':_0x38cabb[_0x5eb330(0x204)][0x0],'desc':_0x38cabb[_0x5eb330(0x22e)]});else return'用户自定义文本只可以连接“文本输入”节点';}if(_0x38cabb[_0x5eb330(0x1df)]){if(typeof _0x765807[_0x38cabb[_0x5eb330(0x1df)][0x0]][_0x5eb330(0x220)]!==_0x5eb330(0x20b)&&typeof _0x765807[_0x38cabb[_0x5eb330(0x1df)][0x0]][_0x5eb330(0x220)][_0x5eb330(0x1b7)]!==_0x5eb330(0x20b))_0x1e44e4[_0x5eb330(0x1e7)][_0x5eb330(0x1fe)]({'node':_0x38cabb[_0x5eb330(0x1df)][0x0],'desc':_0x38cabb[_0x5eb330(0x231)]});else return'用户自定义文本只可以连接“文本输入”节点';}if(_0x38cabb[_0x5eb330(0x21c)]){if(typeof _0x765807[_0x38cabb[_0x5eb330(0x21c)][0x0]][_0x5eb330(0x220)]!==_0x5eb330(0x20b)&&typeof _0x765807[_0x38cabb[_0x5eb330(0x21c)][0x0]][_0x5eb330(0x220)][_0x5eb330(0x1b7)]!=='undefined')_0x1e44e4[_0x5eb330(0x1e7)][_0x5eb330(0x1fe)]({'node':_0x38cabb[_0x5eb330(0x21c)][0x0],'desc':_0x38cabb['cs_text3_desc']});else return'用户自定义文本只可以连接“文本输入”节点';}if(_0x38cabb[_0x5eb330(0x1d6)])_0x1e44e4[_0x5eb330(0x1d6)]=_0x38cabb['title'];else return'请填写作品标题';if(_0x38cabb[_0x5eb330(0x20f)])_0x1e44e4[_0x5eb330(0x20f)]=_0x38cabb[_0x5eb330(0x20f)];else return _0x5eb330(0x227);if(_0x38cabb[_0x5eb330(0x1db)])_0x1e44e4[_0x5eb330(0x1db)]=_0x38cabb[_0x5eb330(0x1db)];else return _0x5eb330(0x200);if(_0x38cabb[_0x5eb330(0x1c3)])_0x1e44e4['server']=_0x38cabb['server'];else return'程序运行出错，请联系管理员';if(_0x38cabb[_0x5eb330(0x1f5)]>=0xa)_0x1e44e4[_0x5eb330(0x1f5)]=_0x38cabb['fee'];else return _0x5eb330(0x207);return _0x1e44e4[_0x5eb330(0x222)]=_0x38cabb[_0x5eb330(0x222)],_0x1e44e4[_0x5eb330(0x1b8)]=_0x765807,_0x1e44e4;}}async function requestExe(_0x21f03d,_0x540450){const _0x5e3e2f=_0x44db5c;var _0x5558c7=getCookie(techsidkey);const _0x4e403a=await api['fetchApi'](_0x5e3e2f(0x1f4),{'method':_0x5e3e2f(0x238),'headers':{'Content-Type':_0x5e3e2f(0x1c8)},'body':JSON[_0x5e3e2f(0x1e2)]({'r':_0x21f03d,'techsid':_0x5558c7,'postData':_0x540450})});if(!_0x4e403a['ok']){setTimeout(()=>{const _0x4fb52e=_0x5e3e2f;showToast(_0x4fb52e(0x1d3),0xbb8);},0x12c);return;}const _0x1e45ed=await _0x4e403a['json']();return _0x1e45ed;}async function login(_0x1bdd44){const _0x2bf2ca=_0x44db5c;let _0x5c1106=await requestExe(_0x2bf2ca(0x23a),{'s_key':_0x1bdd44});if(app['ui'][_0x2bf2ca(0x1f8)][_0x2bf2ca(0x232)][_0x2bf2ca(0x1e6)][_0x2bf2ca(0x23f)]!=_0x2bf2ca(0x225))return _0x5c1106[_0x2bf2ca(0x1d9)]['data'][_0x2bf2ca(0x21d)][_0x2bf2ca(0x22d)]>0x5?_0x5c1106[_0x2bf2ca(0x1d9)][_0x2bf2ca(0x1d9)][_0x2bf2ca(0x21d)]:(await new Promise(_0x2655dd=>setTimeout(_0x2655dd,0x320)),await login(_0x1bdd44));else return;}async function request(_0xfa3a24,_0x30dfb7){const _0x532001=_0x44db5c;showLoading(_0x532001(0x22a));let _0x1fd908=await requestExe(_0xfa3a24,_0x30dfb7);if(_0x1fd908[_0x532001(0x1fb)]==0xa031){let _0x1d78e6=await requestExe(_0x532001(0x23a),{'s_key':''});if(_0x1d78e6){if(_0x1d78e6[_0x532001(0x1d9)][_0x532001(0x1d9)][_0x532001(0x208)]==0x1){hideLoading(),showQrBox(_0x1d78e6[_0x532001(0x1d9)]['data'][_0x532001(0x1d9)],_0x1d78e6['data']['data'][_0x532001(0x1e0)]);let _0x5b5ed8=await login(_0x1d78e6[_0x532001(0x1d9)][_0x532001(0x1d9)]['s_key']);hideCodeBox();if(_0x5b5ed8)return setCookie(techsidkey,_0x5b5ed8),await request(_0xfa3a24,_0x30dfb7);else return;}else{showToast(_0x1d78e6[_0x532001(0x1d9)][_0x532001(0x1d9)][_0x532001(0x20e)]);return;}}}else return hideLoading(),_0x1fd908;}app['registerExtension']({'name':'sdBxb',async 'beforeRegisterNodeDef'(_0x5576a2,_0x163f42,_0x2ffa33){const _0x4903ec=_0x44db5c;if(_0x163f42['name']===_0x4903ec(0x1c9)){const _0x38aa72=_0x5576a2['prototype'][_0x4903ec(0x240)];_0x5576a2[_0x4903ec(0x1d1)]['onNodeCreated']=function(){const _0xa6ebf2=_0x4903ec,_0x4bd1ae=_0x38aa72?_0x38aa72?.[_0xa6ebf2(0x1dc)](this,arguments):undefined,_0x4fc417=this,_0x5f02c8=this[_0xa6ebf2(0x23e)][_0xa6ebf2(0x1fa)](_0x342748=>_0x342748[_0xa6ebf2(0x1ca)]===_0xa6ebf2(0x223)),_0x42fbd9=$el('button.tech_button',{'textContent':_0xa6ebf2(0x1c0),'style':{},'onclick':async()=>{const _0x5d4488=_0xa6ebf2;if(loading)return;hideCodeBox();try{const _0x1c56be=await _0x2ffa33[_0x5d4488(0x203)]();let _0x4be8a9=getPostData(_0x1c56be);if(_0x4be8a9[_0x5d4488(0x1b8)])try{let _0xe1e2cc=await request('comfyui.index.upload',_0x4be8a9);_0xe1e2cc&&(_0xe1e2cc[_0x5d4488(0x1d9)][_0x5d4488(0x1d9)][_0x5d4488(0x208)]==0x1?showCodeBox(_0xe1e2cc['data'][_0x5d4488(0x1d9)]['list']):showMsg(_0xe1e2cc[_0x5d4488(0x1d9)][_0x5d4488(0x1d9)][_0x5d4488(0x20e)]));}catch(_0x1c61cb){hideLoading();}else{tech_alert(_0x4be8a9);return;}}catch(_0x2c039e){tech_alert(_0x5d4488(0x21f));return;}}}),_0x43c53b=_0xa6ebf2(0x221),_0x2102df=_0xa6ebf2(0x229),_0x2f911a=$el(_0xa6ebf2(0x22b),{'id':_0xa6ebf2(0x236)},[_0xa6ebf2(0x1ed),$el('br'),_0x43c53b,$el('br'),_0x2102df]),_0x248585=$el(_0xa6ebf2(0x22b),{'id':_0xa6ebf2(0x1cd)},[_0x42fbd9,_0x2f911a]);this['addDOMWidget'](_0xa6ebf2(0x1c1),_0xa6ebf2(0x23d),_0x248585);const _0x325cd5=document[_0xa6ebf2(0x1f2)](_0xa6ebf2(0x1e5));return _0x325cd5[_0xa6ebf2(0x217)]('type',_0xa6ebf2(0x1b7)),_0x325cd5['setAttribute'](_0xa6ebf2(0x241),_0xa6ebf2(0x1bf)),_0x325cd5[_0xa6ebf2(0x217)](_0xa6ebf2(0x1f3),generateTimestampedRandomString()),_0x325cd5['className']=_0xa6ebf2(0x222),this[_0xa6ebf2(0x1c7)](_0xa6ebf2(0x222),_0xa6ebf2(0x1e5),_0x325cd5,{'getValue'(){const _0x1bf1ef=_0xa6ebf2;return _0x325cd5[_0x1bf1ef(0x1f3)];},'setValue'(_0x326b4b){const _0x4acb01=_0xa6ebf2;_0x325cd5[_0x4acb01(0x1f3)]=_0x326b4b;}}),setTimeout(()=>{const _0x58fe94=_0xa6ebf2;this[_0x58fe94(0x1d7)]([0x1a4,0x1f4]);},0xc8),_0x4bd1ae;},this['serialize_widgets']=!![];}}});
+import { app } from '../../../scripts/app.js'
+import { api } from '../../../scripts/api.js'
+import { ComfyWidgets } from '../../../scripts/widgets.js'
+import { $el } from '../../../scripts/ui.js'
+
+// 添加样式
+const styleElement = document.createElement("style");
+const cssCode = `
+    #msgDiv{
+      width:800px;
+      height: 200px;
+      text-align: center;
+      font-size: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 40px;
+      color: var(--fg-color);
+    }
+    #qrCode{
+      display: block;
+      width:256px;
+      height:256px;
+      border-radius: 10px;
+    }
+    #qrBox{
+      display: block;
+      text-align: center;
+      display:flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 360px;
+    }
+    #qrDesc{
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #ffffff;
+      width: 360px;
+    }
+    .codeImg {
+      // display: block;
+      width:256px;
+      height:256px;
+      border-radius: 10px;
+      padding: 10px;
+      border: 2px solid #ffffff;
+    }
+    .codeDesc {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #ffffff;
+      width: 360px;
+      font-size: 16px;
+    }
+    .codeDiv {
+      color: #ffffff;
+    }
+    .codeBox {
+      display: flex;
+      text-align: center;
+    }
+    #directions{
+      margin-top: 10px;
+      width: 100%;
+      text-align: left;
+      color: #ffffff;
+      font-size: 8px;
+    }
+    .tech_button {
+      flex:1;
+      height:30px;
+      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      font-size:11px;
+      background:var(--comfy-input-bg);
+      color:var(--error-text);
+      box-shadow:none;
+      cursor:pointer;
+      width: 1rem;
+    }
+    #tech_box {
+      max-height: 80px;
+      display:flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .uniqueid {
+      display: none;
+    }
+    #showMsgDiv {
+      width:800px;
+      padding: 60px 0;
+      text-align: center;
+      font-size: 30px;
+      color: var(--fg-color);
+    }
+`
+styleElement.innerHTML = cssCode
+document.head.appendChild(styleElement);
+
+var techsidkey = 'techsid'+window.location.port;
+var loading = false;
+const msgBox = $el("div.comfy-modal", { parent: document.body }, []);
+const msgDiv = $el('div', {id:'msgDiv'},'');
+msgBox.appendChild(msgDiv);
+msgBox.style.display = "none";
+msgBox.style.zIndex = 10001;
+
+function setCookie(name, value, days=1) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return '';
+}
+
+
+function generateTimestampedRandomString() {
+    const timestamp = Date.now().toString();
+    const randomString = Math.random().toString(36).substring(2, 18);
+    const timestampedRandomString = (timestamp + randomString).substring(0, 32);
+    return timestampedRandomString;
+}
+
+
+function showLoading(msg='') {
+  hideLoading();
+  msgDiv.innerText = msg ? msg : '请稍后...';
+  msgBox.style.display = "block";
+  loading = true;
+}
+
+function hideLoading() {
+  msgBox.style.display = "none";
+  loading = false;
+}
+
+function showToast(msg='', t=0) {
+  t = t > 0 ? t : 2000;
+  msgDiv.innerText = msg ? msg : '谢谢';
+  msgBox.style.display = "block";
+  setTimeout(()=> {
+    msgBox.style.display = "none";
+  }, t);
+}
+var serverUrl = window.location.href;
+const qrCode = $el('img',{id:'qrCode',src:``,
+          onerror:()=>{
+            // console.log('参数错误');
+          }
+      })
+const qrDesc = $el('div',{id:'qrDesc'},'请用微信扫码，验证身份...')
+const qrBox = $el('div',{id:'qrBox'},[qrCode, qrDesc])
+app.ui.dialog.element.style.zIndex = 10010;
+
+const showMsgDiv = $el('div',{id:'showMsgDiv'},'请稍后...')
+
+function showCodeBox(list) {
+  app.ui.dialog.close();
+  let listn = [];
+  for (let i = 0; i < list.length; i++) {
+    listn.push($el('div.codeDiv',{},[$el('img.codeImg',{src:list[i].code}), $el('div.codeDesc',{},list[i].desc)]))
+  }
+  const codeBox = $el('div.codeBox',{},listn)
+  app.ui.dialog.show(codeBox);
+}
+
+
+function showQrBox(img, desc) {
+  app.ui.dialog.close();
+  qrDesc.innerText = desc;
+  qrCode.src = img;
+  app.ui.dialog.show(qrBox);
+}
+
+function hideCodeBox() {
+  app.ui.dialog.close();
+}
+
+function showMsg(msg) {
+  app.ui.dialog.close();
+  showMsgDiv.innerText = msg;
+  app.ui.dialog.show(showMsgDiv);
+}
+
+
+function hideMsg() {
+  app.ui.dialog.close();
+}
+
+function tech_alert(text) {
+  loading = false;
+  // alert(text);
+  showMsg(text);
+}
+
+function getPostData(prompt) {
+  const output = prompt['output'];
+  let HuiseNum = 0;
+  let HuiseO = {};
+  let HuiseN = {};
+  let postData = {};
+  let saveImageNodes = [];
+  for (const key in output) {
+    if(output[key].class_type == 'sdBxb') {
+      HuiseO = output[key].inputs;
+      HuiseNum++;
+    }
+    if(output[key].class_type == 'SaveImage') {
+      output[key].res_node = key;
+      saveImageNodes.push(output[key]);
+    }
+  }
+  if(HuiseNum > 1) {
+    return('工作流中只可以存在1个“SD变现宝”节点'); 
+  }
+  if(saveImageNodes.length < 1) {
+    return('请确保工作流中有且仅有1个“SaveImgae”或“保存图像”节点，目前有'+saveImageNodes.length+'个'); 
+  } else if(saveImageNodes.length > 1) {
+    return('请确保工作流中有且仅有1个“SaveImgae”或“保存图像”节点，目前有'+saveImageNodes.length+'个'); 
+  } else {
+    postData['res_node'] = saveImageNodes[0].res_node;
+  }
+  if(HuiseO) {
+    HuiseN['zhutu1'] = HuiseO['作品主图1（连接“加载图像”节点，可选）'];
+    HuiseN['zhutu2'] = HuiseO['作品主图2（连接“加载图像”节点，可选）'];
+    HuiseN['zhutu3'] = HuiseO['作品主图3（连接“加载图像”节点，可选）'];
+    HuiseN['cs_img1'] = HuiseO['用户自定义图片1（连接“加载图像”节点，可选）'];
+    HuiseN['cs_img2'] = HuiseO['用户自定义图片2（连接“加载图像”节点，可选）'];
+    HuiseN['cs_img3'] = HuiseO['用户自定义图片3（连接“加载图像”节点，可选）'];
+    HuiseN['cs_text1'] = HuiseO['用户自定义文本1（连接“文本输入”节点，可选）'];
+    HuiseN['cs_text2'] = HuiseO['用户自定义文本2（连接“文本输入”节点，可选）'];
+    HuiseN['cs_text3'] = HuiseO['用户自定义文本3（连接“文本输入”节点，可选）'];
+    HuiseN['title'] = HuiseO['作品标题'];
+    HuiseN['gn_desc'] = HuiseO['作品功能介绍'];
+    HuiseN['sy_desc'] = '作品使用说明';
+    HuiseN['server'] = serverUrl;
+    HuiseN['fee'] = HuiseO['作品服务单价（分）'];
+    HuiseN['cs_img1_desc'] = HuiseO['自定义图片1上传说明'];
+    HuiseN['cs_img2_desc'] = HuiseO['自定义图片2上传说明'];
+    HuiseN['cs_img3_desc'] = HuiseO['自定义图片3上传说明'];
+    HuiseN['cs_text1_desc'] = HuiseO['自定义文本1输入说明'];
+    HuiseN['cs_text2_desc'] = HuiseO['自定义文本2输入说明'];
+    HuiseN['cs_text3_desc'] = HuiseO['自定义文本3输入说明'];
+    HuiseN['uniqueid'] = HuiseO['uniqueid'];
+    postData['zhutus'] = [];
+    if(HuiseN['zhutu1']) {
+      if(output[HuiseN['zhutu1'][0]].class_type == 'LoadImage') {
+        if(output[HuiseN['zhutu1'][0]].inputs.image) {
+          postData['zhutus'].push(output[HuiseN['zhutu1'][0]].inputs.image);
+        }
+      } else {
+        return('作品主图只可以连接“加载图像”节点');
+      }
+    }
+    if(HuiseN['zhutu2']) {
+      if(output[HuiseN['zhutu2'][0]].class_type == 'LoadImage') {
+        if(output[HuiseN['zhutu2'][0]].inputs.image) {
+          postData['zhutus'].push(output[HuiseN['zhutu2'][0]].inputs.image);
+        }
+      } else {
+        return('作品主图只可以连接“加载图像”节点');
+      }
+    }
+    if(HuiseN['zhutu3']) {
+      if(output[HuiseN['zhutu3'][0]].class_type == 'LoadImage') {
+        if(output[HuiseN['zhutu3'][0]].inputs.image) {
+          postData['zhutus'].push(output[HuiseN['zhutu3'][0]].inputs.image);
+        }
+      } else {
+        return('作品主图只可以连接“加载图像”节点');
+      }
+    }
+
+    postData['cs_img_nodes'] = [];
+    if(HuiseN['cs_img1']) {
+      if(output[HuiseN['cs_img1'][0]].class_type == 'LoadImage') {
+        postData['cs_img_nodes'].push({node: HuiseN['cs_img1'][0], desc: HuiseN['cs_img1_desc']});
+      } else {
+        return('用户自定义图片只可以连接“加载图像”节点');
+      }
+    }
+    if(HuiseN['cs_img2']) {
+      if(output[HuiseN['cs_img2'][0]].class_type == 'LoadImage') {
+        postData['cs_img_nodes'].push({node: HuiseN['cs_img2'][0], desc: HuiseN['cs_img2_desc']});
+      } else {
+        return('用户自定义图片只可以连接“加载图像”节点');
+      }
+    }
+    if(HuiseN['cs_img3']) {
+      if(output[HuiseN['cs_img3'][0]].class_type == 'LoadImage') {
+        postData['cs_img_nodes'].push({node: HuiseN['cs_img3'][0], desc: HuiseN['cs_img3_desc']});
+      } else {
+        return('用户自定义图片只可以连接“加载图像”节点');
+      }
+    }
+
+    postData['cs_text_nodes'] = [];
+    if(HuiseN['cs_text1']) {
+      if(typeof output[HuiseN['cs_text1'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text1'][0]].inputs.text !== 'undefined') {
+        postData['cs_text_nodes'].push({node: HuiseN['cs_text1'][0], desc: HuiseN['cs_text1_desc']});
+      } else {
+        return('用户自定义文本只可以连接“文本输入”节点');
+      }
+    }
+    if(HuiseN['cs_text2']) {
+      if(typeof output[HuiseN['cs_text2'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text2'][0]].inputs.text !== 'undefined') {
+        postData['cs_text_nodes'].push({node: HuiseN['cs_text2'][0], desc: HuiseN['cs_text2_desc']});
+      } else {
+        return('用户自定义文本只可以连接“文本输入”节点');
+      }
+    }
+    if(HuiseN['cs_text3']) {
+      if(typeof output[HuiseN['cs_text3'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text3'][0]].inputs.text !== 'undefined') {
+        postData['cs_text_nodes'].push({node: HuiseN['cs_text3'][0], desc: HuiseN['cs_text3_desc']});
+      } else {
+        return('用户自定义文本只可以连接“文本输入”节点');
+      }
+    }
+    if(HuiseN['title']) {
+      postData['title'] = HuiseN['title'];
+    } else {
+      return('请填写作品标题');
+    }
+    if(HuiseN['gn_desc']) {
+      postData['gn_desc'] = HuiseN['gn_desc'];
+    } else {
+      return('请填写作品功能介绍');
+    }
+    if(HuiseN['sy_desc']) {
+      postData['sy_desc'] = HuiseN['sy_desc'];
+    } else {
+      return('请填写作品使用说明');
+    }
+    if(HuiseN['server']) {
+      postData['server'] = HuiseN['server'];
+    } else {
+      return('程序运行出错，请联系管理员');
+    }
+    if(HuiseN['fee'] >= 10) {
+      postData['fee'] = HuiseN['fee'];
+    } else {
+      return('作品服务单价不能小于0.1元');
+    }
+    postData['uniqueid'] = HuiseN['uniqueid'];
+    postData['output'] = output;
+    return postData;
+  }
+}
+
+async function requestExe(r, postData) {
+  var techsid = getCookie(techsidkey);
+  const response = await api.fetchApi(`/manager/tech_zhulu`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      r: r,
+      techsid: techsid,
+      postData: postData
+    })
+  });
+  if (!response.ok) {
+    setTimeout(()=> {
+      showToast('网络连接出错，请保持电脑联网', 3000);
+    }, 300);
+    return;
+  }
+  const resdata = await response.json();
+  return resdata;
+}
+
+async function login(s_key) {
+  let res = await requestExe('comfyui.index.code', {s_key: s_key});
+  if(app.ui.dialog.element.style.display != 'none') {
+    if(res.data.data.techsid.length > 5) {
+      return res.data.data.techsid;
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return await login(s_key);
+    }
+  } else {
+    return;
+  }}
+
+
+
+async function request(r, postData) {
+  showLoading('处理中，请稍后...');
+  let resdata = await requestExe(r, postData);
+  if(resdata.errno == 41009) {
+    let resdata = await requestExe('comfyui.index.code', {s_key: ''});
+    if(resdata) {
+      if (resdata.data.data.code == 1) {
+        hideLoading();
+        showQrBox(resdata.data.data.data, resdata.data.data.desc);
+        let techsid = await login(resdata.data.data.s_key);
+        hideCodeBox();
+        if(techsid) {
+          setCookie(techsidkey, techsid);
+          return await request(r, postData);
+        } else {
+          return;
+        }
+      } else {
+        showToast(resdata.data.data.message);
+        return;
+      }
+    }
+  } else {
+    hideLoading();
+    return resdata;
+  }
+}
+
+app.registerExtension({
+  name: 'sdBxb',
+  async beforeRegisterNodeDef (nodeType, nodeData, app) {
+    if (nodeData.name === 'sdBxb') {
+
+      const onNodeCreated = nodeType.prototype.onNodeCreated;
+      nodeType.prototype.onNodeCreated = function () {
+        const r = onNodeCreated ? onNodeCreated?.apply(this, arguments) : undefined;
+        const that = this;
+        const zhanweiIndex = this.widgets.findIndex((w) => w.name === "zhanwei");
+        const tech_button = $el('button.tech_button',{textContent: '点此，工作流转小程序，并获取访问地址',style:{},
+          onclick:async ()=>{
+            if(loading) return;
+            hideCodeBox();
+            try {
+              const prompt = await app.graphToPrompt()
+              let postData = getPostData(prompt);
+              if(postData['output']) {
+                try {
+                  let resdata = await request('comfyui.index.upload', postData);
+                  if(resdata) {
+                    if (resdata.data.data.code == 1) {
+                      showCodeBox(resdata.data.data.list);
+                    } else {
+                      // showToast(resdata.data.data.message);            
+                      showMsg(resdata.data.data.message);
+                    }
+                  }
+                } catch (error) {
+                  hideLoading();
+                }
+              } else {
+                tech_alert(postData);
+                return;
+              }
+            } catch (error) {
+              tech_alert('获取api数据失败');
+              return;
+            }
+          }}
+        )
+        const dstr1 = '1、每创建一个新的“SD变现宝”节点，就对应一个新的作品；';
+        const dstr2 = '2、如有问题，请加入SD变现宝商家QQ群：967073981';
+        const directions = $el('div',{id:'directions'},['特殊说明：',$el('br'),dstr1,$el('br'),dstr2])
+        const tech_box = $el('div',{id:'tech_box'},[tech_button, directions])
+        this.addDOMWidget('select_styles',"btn", tech_box);
+
+        const inputEl = document.createElement("input");
+        inputEl.setAttribute("type", "text");
+        inputEl.setAttribute("list", "uedynamiclist");
+        inputEl.setAttribute("value", generateTimestampedRandomString());
+        inputEl.className = "uniqueid";
+        this.addDOMWidget('uniqueid', "input", inputEl, {
+            getValue() { return inputEl.value; },
+            setValue(v) { inputEl.value = v; },
+        });
+        setTimeout(() => {
+            this.setSize([420, 500]);
+            // if(serverUrl) {
+            //   this.widgets[3].value = serverUrl;
+            // }
+            // if(this.widgets[16].value == '.*') {
+            //   this.widgets[16].value = generateTimestampedRandomString();
+            // }
+            // console.log(this.widgets[16].value);
+        }, 200)
+
+
+        return r;
+      }
+      this.serialize_widgets = true //需要保存参数
+    }
+  }
+})
+
+
+// app.registerExtension({
+//   name: "Huise.menu",
+//   async setup() {
+
+//     const menu = document.querySelector(".comfy-menu");
+//     const huiseButton = document.createElement("button");
+//     huiseButton.textContent = "绘色管理";
+//     huiseButton.style.background = "linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%)";
+//     huiseButton.style.color = "black";
+//     huiseButton.onclick = () => {
+//         if(!manager_instance)
+//           setManagerInstance(new ManagerMenuDialog());
+//         manager_instance.show();
+//       }
+//     menu.append(huiseButton);
+
+//   },
+// });
