@@ -252,17 +252,17 @@ class sdBxb:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "作品标题": ("STRING", {
+                "app_title": ("STRING", {
                     "multiline": False, 
                     "default": "这是默认作品标题，请在comfyui中修改",
                     "placeholder": ""
                 }),
-                "作品功能介绍": ("STRING", {
+                "app_desc": ("STRING", {
                     "multiline": False, 
                     "default": "这是默认功能介绍，请在comfyui中修改",
                     "placeholder": ""
                 }),
-                "作品服务单价（分）": ("INT", {
+                "app_fee": ("INT", {
                     "default": 18, 
                     "min": 10, #最小值
                     "max": 999999, #最大值
@@ -271,54 +271,54 @@ class sdBxb:
                 }),
             },
             "optional": {
-                "作品主图1（连接“加载图像”节点，可选）": ("IMAGE",),
-                "作品主图2（连接“加载图像”节点，可选）": ("IMAGE",),
-                "作品主图3（连接“加载图像”节点，可选）": ("IMAGE",),
-                "用户自定义图片1（连接“加载图像”节点，可选）": ("IMAGE",),
-                "用户自定义图片2（连接“加载图像”节点，可选）": ("IMAGE",),
-                "用户自定义图片3（连接“加载图像”节点，可选）": ("IMAGE",),
-                "用户自定义文本1（连接“文本输入”节点，可选）": ("STRING", {
+                "app_img1(optional)": ("IMAGE",),
+                "app_img2(optional)": ("IMAGE",),
+                "app_img3(optional)": ("IMAGE",),
+                "custom_img1(optional)": ("IMAGE",),
+                "custom_img2(optional)": ("IMAGE",),
+                "custom_img3(optional)": ("IMAGE",),
+                "custom_text1(optional)": ("STRING", {
                     "multiline": False, 
                     "forceInput": True,
                     "dynamicPrompts": False
                 }),
-                "用户自定义文本2（连接“文本输入”节点，可选）": ("STRING", {
+                "custom_text2(optional)": ("STRING", {
                     "multiline": False, 
                     "forceInput": True,
                     "dynamicPrompts": False
                 }),
-                "用户自定义文本3（连接“文本输入”节点，可选）": ("STRING", {
+                "custom_text3(optional)": ("STRING", {
                     "multiline": False, 
                     "forceInput": True,
                     "dynamicPrompts": False
                 }),
-                "自定义图片1上传说明": ("STRING", {
+                "custom_img1_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请上传图片"
                 }),
-                "自定义图片2上传说明": ("STRING", {
+                "custom_img2_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请上传图片"
                 }),
-                "自定义图片3上传说明": ("STRING", {
+                "custom_img3_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请上传图片"
                 }),
-                "自定义文本1输入说明": ("STRING", {
+                "custom_text1_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请输入文本"
                 }),
-                "自定义文本2输入说明": ("STRING", {
+                "custom_text2_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请输入文本"
                 }),
-                "自定义文本3输入说明": ("STRING", {
+                "custom_text3_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请输入文本"
                 }),
             },
             "hidden": {
-                "自定义文本3333333": ("STRING", {
+                "custom_text333333": ("STRING", {
                     "multiline": False, 
                     "default": "输入文本"
                 }),
@@ -327,7 +327,7 @@ class sdBxb:
 
     RETURN_TYPES = ()
 
-    CATEGORY = "SD变现宝"
+    CATEGORY = "sdBxb"
 
 
 # 文本输入
@@ -345,7 +345,7 @@ class sdBxb_textInput:
     RETURN_TYPES = ("STRING",)
     FUNCTION = "main"
 
-    CATEGORY = "SD变现宝"
+    CATEGORY = "sdBxb"
 
     @staticmethod
     def main(text):
@@ -360,6 +360,6 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "sdBxb": "SD变现宝",
-    "sdBxb_textInput": "文本输入"
+    "sdBxb": "sdBxb",
+    "sdBxb_textInput": "textInput"
 }

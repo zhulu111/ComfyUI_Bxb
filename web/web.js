@@ -236,26 +236,26 @@ function getPostData(prompt) {
     postData['res_node'] = saveImageNodes[0].res_node;
   }
   if(HuiseO) {
-    HuiseN['zhutu1'] = HuiseO['作品主图1（连接“加载图像”节点，可选）'];
-    HuiseN['zhutu2'] = HuiseO['作品主图2（连接“加载图像”节点，可选）'];
-    HuiseN['zhutu3'] = HuiseO['作品主图3（连接“加载图像”节点，可选）'];
-    HuiseN['cs_img1'] = HuiseO['用户自定义图片1（连接“加载图像”节点，可选）'];
-    HuiseN['cs_img2'] = HuiseO['用户自定义图片2（连接“加载图像”节点，可选）'];
-    HuiseN['cs_img3'] = HuiseO['用户自定义图片3（连接“加载图像”节点，可选）'];
-    HuiseN['cs_text1'] = HuiseO['用户自定义文本1（连接“文本输入”节点，可选）'];
-    HuiseN['cs_text2'] = HuiseO['用户自定义文本2（连接“文本输入”节点，可选）'];
-    HuiseN['cs_text3'] = HuiseO['用户自定义文本3（连接“文本输入”节点，可选）'];
-    HuiseN['title'] = HuiseO['作品标题'];
-    HuiseN['gn_desc'] = HuiseO['作品功能介绍'];
+    HuiseN['zhutu1'] = HuiseO['app_img1(optional)'];
+    HuiseN['zhutu2'] = HuiseO['app_img2(optional)'];
+    HuiseN['zhutu3'] = HuiseO['app_img3(optional)'];
+    HuiseN['cs_img1'] = HuiseO['custom_img1(optional)'];
+    HuiseN['cs_img2'] = HuiseO['custom_img2(optional)'];
+    HuiseN['cs_img3'] = HuiseO['custom_img3(optional)'];
+    HuiseN['cs_text1'] = HuiseO['custom_text1(optional)'];
+    HuiseN['cs_text2'] = HuiseO['custom_text2(optional)'];
+    HuiseN['cs_text3'] = HuiseO['custom_text3(optional)'];
+    HuiseN['title'] = HuiseO['app_title'];
+    HuiseN['gn_desc'] = HuiseO['app_desc'];
     HuiseN['sy_desc'] = '作品使用说明';
     HuiseN['server'] = serverUrl;
-    HuiseN['fee'] = HuiseO['作品服务单价（分）'];
-    HuiseN['cs_img1_desc'] = HuiseO['自定义图片1上传说明'];
-    HuiseN['cs_img2_desc'] = HuiseO['自定义图片2上传说明'];
-    HuiseN['cs_img3_desc'] = HuiseO['自定义图片3上传说明'];
-    HuiseN['cs_text1_desc'] = HuiseO['自定义文本1输入说明'];
-    HuiseN['cs_text2_desc'] = HuiseO['自定义文本2输入说明'];
-    HuiseN['cs_text3_desc'] = HuiseO['自定义文本3输入说明'];
+    HuiseN['fee'] = HuiseO['app_fee'];
+    HuiseN['cs_img1_desc'] = HuiseO['custom_img1_desc'];
+    HuiseN['cs_img2_desc'] = HuiseO['custom_img2_desc'];
+    HuiseN['cs_img3_desc'] = HuiseO['custom_img3_desc'];
+    HuiseN['cs_text1_desc'] = HuiseO['custom_text1_desc'];
+    HuiseN['cs_text2_desc'] = HuiseO['custom_text2_desc'];
+    HuiseN['cs_text3_desc'] = HuiseO['custom_text3_desc'];
     HuiseN['uniqueid'] = HuiseO['uniqueid'];
     postData['zhutus'] = [];
     if(HuiseN['zhutu1']) {
