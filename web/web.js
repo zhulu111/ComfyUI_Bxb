@@ -210,6 +210,7 @@ function tech_alert(text) {
 
 function getPostData(prompt) {
   const output = prompt['output'];
+  // console.log(output);
   let HuiseNum = 0;
   let HuiseO = {};
   let HuiseN = {};
@@ -264,7 +265,7 @@ function getPostData(prompt) {
           postData['zhutus'].push(output[HuiseN['zhutu1'][0]].inputs.image);
         }
       } else {
-        return('作品主图只可以连接“加载图像”节点');
+        return('“app_img1”只可以连接“LoadImage”节点');
       }
     }
     if(HuiseN['zhutu2']) {
@@ -273,7 +274,7 @@ function getPostData(prompt) {
           postData['zhutus'].push(output[HuiseN['zhutu2'][0]].inputs.image);
         }
       } else {
-        return('作品主图只可以连接“加载图像”节点');
+        return('“app_img2”只可以连接“LoadImage”节点');
       }
     }
     if(HuiseN['zhutu3']) {
@@ -282,7 +283,7 @@ function getPostData(prompt) {
           postData['zhutus'].push(output[HuiseN['zhutu3'][0]].inputs.image);
         }
       } else {
-        return('作品主图只可以连接“加载图像”节点');
+        return('“app_img3”只可以连接“LoadImage”节点');
       }
     }
 
@@ -291,55 +292,55 @@ function getPostData(prompt) {
       if(output[HuiseN['cs_img1'][0]].class_type == 'LoadImage') {
         postData['cs_img_nodes'].push({node: HuiseN['cs_img1'][0], desc: HuiseN['cs_img1_desc']});
       } else {
-        return('用户自定义图片只可以连接“加载图像”节点');
+        return('“custom_img1”只可以连接“LoadImage”节点');
       }
     }
     if(HuiseN['cs_img2']) {
       if(output[HuiseN['cs_img2'][0]].class_type == 'LoadImage') {
         postData['cs_img_nodes'].push({node: HuiseN['cs_img2'][0], desc: HuiseN['cs_img2_desc']});
       } else {
-        return('用户自定义图片只可以连接“加载图像”节点');
+        return('“custom_img2”只可以连接“LoadImage”节点');
       }
     }
     if(HuiseN['cs_img3']) {
       if(output[HuiseN['cs_img3'][0]].class_type == 'LoadImage') {
         postData['cs_img_nodes'].push({node: HuiseN['cs_img3'][0], desc: HuiseN['cs_img3_desc']});
       } else {
-        return('用户自定义图片只可以连接“加载图像”节点');
+        return('“custom_img3”只可以连接“LoadImage”节点');
       }
     }
 
     postData['cs_text_nodes'] = [];
     if(HuiseN['cs_text1']) {
-      if(typeof output[HuiseN['cs_text1'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text1'][0]].inputs.text !== 'undefined') {
+      if(output[HuiseN['cs_text1'][0]] && typeof output[HuiseN['cs_text1'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text1'][0]].inputs.text !== 'undefined') {
         postData['cs_text_nodes'].push({node: HuiseN['cs_text1'][0], desc: HuiseN['cs_text1_desc']});
       } else {
-        return('用户自定义文本只可以连接“文本输入”节点');
+        return('“custom_text1”只可以连接“textInput”节点');
       }
     }
     if(HuiseN['cs_text2']) {
-      if(typeof output[HuiseN['cs_text2'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text2'][0]].inputs.text !== 'undefined') {
+      if(output[HuiseN['cs_text2'][0]] && typeof output[HuiseN['cs_text2'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text2'][0]].inputs.text !== 'undefined') {
         postData['cs_text_nodes'].push({node: HuiseN['cs_text2'][0], desc: HuiseN['cs_text2_desc']});
       } else {
-        return('用户自定义文本只可以连接“文本输入”节点');
+        return('“custom_text2”只可以连接“textInput”节点');
       }
     }
     if(HuiseN['cs_text3']) {
-      if(typeof output[HuiseN['cs_text3'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text3'][0]].inputs.text !== 'undefined') {
+      if(output[HuiseN['cs_text3'][0]] && typeof output[HuiseN['cs_text3'][0]].inputs !== 'undefined' && typeof output[HuiseN['cs_text3'][0]].inputs.text !== 'undefined') {
         postData['cs_text_nodes'].push({node: HuiseN['cs_text3'][0], desc: HuiseN['cs_text3_desc']});
       } else {
-        return('用户自定义文本只可以连接“文本输入”节点');
+        return('“custom_text3”只可以连接“textInput”节点');
       }
     }
     if(HuiseN['title']) {
       postData['title'] = HuiseN['title'];
     } else {
-      return('请填写作品标题');
+      return('“app_title”, 不可为空，请填写作品标题');
     }
     if(HuiseN['gn_desc']) {
       postData['gn_desc'] = HuiseN['gn_desc'];
     } else {
-      return('请填写作品功能介绍');
+      return('“app_desc”, 不可为空，请填写作品功能介绍');
     }
     if(HuiseN['sy_desc']) {
       postData['sy_desc'] = HuiseN['sy_desc'];
@@ -354,7 +355,7 @@ function getPostData(prompt) {
     if(HuiseN['fee'] >= 10) {
       postData['fee'] = HuiseN['fee'];
     } else {
-      return('作品服务单价不能小于0.1元');
+      return('“app_fee”不能小于10分，即0.1元');
     }
     postData['uniqueid'] = HuiseN['uniqueid'];
     postData['output'] = output;
@@ -462,13 +463,14 @@ app.registerExtension({
                 return;
               }
             } catch (error) {
+              console.log(error);
               tech_alert('获取api数据失败');
               return;
             }
           }}
         )
         const dstr1 = '1、每创建一个新的“SD变现宝”节点，就对应一个新的作品；';
-        const dstr2 = '2、如有问题，请加入SD变现宝商家QQ群：967073981';
+        const dstr2 = '2、如有问题，请加入SD变现宝商家QQ群：967073981，联系作者咨询。';
         const directions = $el('div',{id:'directions'},['特殊说明：',$el('br'),dstr1,$el('br'),dstr2])
         const tech_box = $el('div',{id:'tech_box'},[tech_button, directions])
         this.addDOMWidget('select_styles',"btn", tech_box);
