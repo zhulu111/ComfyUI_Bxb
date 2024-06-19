@@ -437,7 +437,7 @@ app.registerExtension({
         const r = onNodeCreated ? onNodeCreated?.apply(this, arguments) : undefined;
         const that = this;
         const zhanweiIndex = this.widgets.findIndex((w) => w.name === "zhanwei");
-        const tech_button = $el('button.tech_button',{textContent: '点此，工作流转小程序，并获取访问地址',style:{},
+        const tech_button = $el('button.tech_button',{textContent: '点此，工作流转小程序/H5，并获取访问地址',style:{},
           onclick:async ()=>{
             if(loading) return;
             hideCodeBox();
@@ -470,7 +470,7 @@ app.registerExtension({
           }}
         )
         const dstr1 = '1、每创建一个新的“SD变现宝”节点，就对应一个新的作品；';
-        const dstr2 = '2、如有问题，请加入SD变现宝商家QQ群：967073981，联系作者咨询。';
+        const dstr2 = '2、如有问题，请加入SD变现宝官方QQ群：967073981，联系作者咨询。';
         const directions = $el('div',{id:'directions'},['特殊说明：',$el('br'),dstr1,$el('br'),dstr2])
         const tech_box = $el('div',{id:'tech_box'},[tech_button, directions])
         this.addDOMWidget('select_styles',"btn", tech_box);
