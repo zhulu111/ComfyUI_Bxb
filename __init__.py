@@ -39,7 +39,7 @@ def get_port_from_cmdline():
     return 8188
 
 def generate_unique_subdomain(mac_address, port):
-    """根据 MAC 地址和端口号生成唯一的子域名"""
+    # 根据 MAC 地址和端口号生成唯一的子域名
     unique_key = f"{mac_address}:{port}"
     hash_object = hashlib.sha256(unique_key.encode())
     subdomain = hash_object.hexdigest()[:12]
@@ -54,7 +54,7 @@ def set_executable_permission(file_path):
         print(f"Failed to set execution permissions: {e}")
 
 def download_file(url, dest_path):
-    """使用 urllib 下载文件到指定路径"""
+    # 使用 urllib 下载文件到指定路径
     try:
         with urllib.request.urlopen(url) as response, open(dest_path, 'wb') as out_file:
             data = response.read()  # 读取数据
@@ -88,7 +88,7 @@ class SDClient:
         self.stop_monitoring = False
 
     def create_sdc_ini(self, file_path, subdomain):
-        """生成 sdc.toml 文件"""
+        # 生成 sdc.toml 文件
         config_content = f"""
 [common]
 server_addr = "{self.server_addr}"
@@ -108,7 +108,7 @@ log_level = "info"
             config_file.write(config_content)
 
     def tail_log(self, filename, num_lines=20):
-        """获取日志文件的最后几行"""
+        # 获取日志文件的最后几行
         try:
             with open(filename, "r") as file:
                 return deque(file, num_lines)
@@ -116,7 +116,7 @@ log_level = "info"
             return deque()
 
     def check_sd_log_for_status(self):
-        """检查日志文件中是否包含连接成功或失败的标志性信息"""
+        # 检查日志文件中是否包含连接成功或失败的标志性信息
         success_keywords = ["login to server success", "start proxy success"]
         failure_keywords = ["connect to server error", "read tcp", "session shutdown"]
         connection_attempt_pattern = re.compile(r"try to connect to server")
@@ -148,7 +148,7 @@ log_level = "info"
                 set_executable_permission(SDC_EXECUTABLE)
 
     def start(self):
-        """启动 SD 客户端"""
+        # 启动 SD 客户端
         self.check_and_download_executable()  # 检查并下载可执行文件
         self.create_sdc_ini(INI_FILE, self.subdomain)
 
@@ -178,7 +178,7 @@ log_level = "info"
             print(f"Error starting SD client: {e}")
 
     def monitor_connection_status(self):
-        """监测 SD 连接状态"""
+        # 监测 SD 连接状态
         while not self.stop_monitoring:
             status = self.check_sd_log_for_status()
             if status == "connected":
@@ -192,7 +192,7 @@ log_level = "info"
             time.sleep(1)
 
     def stop(self):
-        """停止 SD 客户端并终止监控线程"""
+        # 停止 SD 客户端并终止监控线程
         if self.sd_process and self.sd_process.poll() is None:
             self.sd_process.terminate()
             self.sd_process.wait()
@@ -203,11 +203,11 @@ log_level = "info"
         self.stop_monitoring = True
 
     def is_connected(self):
-        """检查 SD 客户端是否连接成功"""
+        # 检查 SD 客户端是否连接成功
         return self.connected
 
     def clear_log(self):
-        """清理日志文件"""
+        # 清理日志文件
         if os.path.exists(LOG_FILE):
             open(LOG_FILE, "w").close()
             print("SD client log cleared。")
