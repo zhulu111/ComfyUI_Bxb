@@ -256,7 +256,7 @@ class sdBxb:
             "hidden": {
                 "custom_text333333": ("STRING", {
                     "multiline": False, 
-                    "default": "输入文本"
+                    "default": "输入文本1"
                 }),
             }
         }
