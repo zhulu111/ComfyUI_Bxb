@@ -7,6 +7,7 @@ SD变现宝插件可以一键把comfyui工作流转为“微信小程序”、�
 ![Intro Image](assets/lxwm.jpg) 
 ## 视频教程
 B站：https://www.bilibili.com/video/BV1Bsg8eeEjv
+YouTube：https://youtu.be/5lJn-NHtc9w
 ## 安装方式
 1、通过ComfyUI-Manager在线安装，在ComfyUI-Manager中搜索“ComfyUI_Bxb”即可找到本插件（推荐）；  
 2、通过git clone下载插件包，放到ComfyUI/custom_nodes目录下，重启ComfyUI即可安装本插件；  
