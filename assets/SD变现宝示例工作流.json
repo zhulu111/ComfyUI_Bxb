@@ -1,6 +1,6 @@
 {
-  "last_node_id": 23,
-  "last_link_id": 29,
+  "last_node_id": 24,
+  "last_link_id": 32,
   "nodes": [
     {
       "id": 8,
@@ -21,13 +21,13 @@
           "name": "samples",
           "type": "LATENT",
           "link": 7,
-          "label": "Latent"
+          "label": "samples"
         },
         {
           "name": "vae",
           "type": "VAE",
           "link": 17,
-          "label": "VAE"
+          "label": "vae"
         }
       ],
       "outputs": [
@@ -38,7 +38,7 @@
             9
           ],
           "slot_index": 0,
-          "label": "图像"
+          "label": "IMAGE"
         }
       ],
       "properties": {
@@ -64,13 +64,13 @@
           "name": "pixels",
           "type": "IMAGE",
           "link": 28,
-          "label": "图像"
+          "label": "pixels"
         },
         {
           "name": "vae",
           "type": "VAE",
           "link": 16,
-          "label": "VAE"
+          "label": "vae"
         }
       ],
       "outputs": [
@@ -81,7 +81,7 @@
             11
           ],
           "slot_index": 0,
-          "label": "Latent"
+          "label": "LATENT"
         }
       ],
       "properties": {
@@ -107,25 +107,25 @@
           "name": "model",
           "type": "MODEL",
           "link": 13,
-          "label": "模型"
+          "label": "model"
         },
         {
           "name": "positive",
           "type": "CONDITIONING",
           "link": 4,
-          "label": "正面条件"
+          "label": "positive"
         },
         {
           "name": "negative",
           "type": "CONDITIONING",
           "link": 6,
-          "label": "负面条件"
+          "label": "negative"
         },
         {
           "name": "latent_image",
           "type": "LATENT",
           "link": 11,
-          "label": "Latent"
+          "label": "latent_image"
         }
       ],
       "outputs": [
@@ -136,14 +136,14 @@
             7
           ],
           "slot_index": 0,
-          "label": "Latent"
+          "label": "LATENT"
         }
       ],
       "properties": {
         "Node name for S&R": "KSampler"
       },
       "widgets_values": [
-        1022398155212734,
+        894690734156289,
         "randomize",
         30,
         6,
@@ -171,7 +171,7 @@
           "name": "images",
           "type": "IMAGE",
           "link": 9,
-          "label": "图像"
+          "label": "images"
         }
       ],
       "properties": {
@@ -193,14 +193,14 @@
         "1": 180.6060791015625
       },
       "flags": {},
-      "order": 5,
+      "order": 4,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
           "link": 15,
-          "label": "CLIP"
+          "label": "clip"
         }
       ],
       "outputs": [
@@ -211,7 +211,7 @@
             6
           ],
           "slot_index": 0,
-          "label": "条件"
+          "label": "CONDITIONING"
         }
       ],
       "properties": {
@@ -240,7 +240,7 @@
           "name": "clip",
           "type": "CLIP",
           "link": 14,
-          "label": "CLIP"
+          "label": "clip"
         },
         {
           "name": "text",
@@ -249,7 +249,7 @@
           "widget": {
             "name": "text"
           },
-          "label": "文本"
+          "label": "text"
         }
       ],
       "outputs": [
@@ -260,7 +260,7 @@
             4
           ],
           "slot_index": 0,
-          "label": "条件"
+          "label": "CONDITIONING"
         }
       ],
       "properties": {
@@ -268,87 +268,6 @@
       },
       "widgets_values": [
         "red hair"
-      ]
-    },
-    {
-      "id": 17,
-      "type": "LoadImage",
-      "pos": [
-        640,
-        690
-      ],
-      "size": [
-        258.9326889527024,
-        207.83119359797126
-      ],
-      "flags": {},
-      "order": 0,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            21
-          ],
-          "shape": 3,
-          "label": "图像"
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null,
-          "shape": 3,
-          "label": "遮罩"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "ComfyUI_00469_ (1).png",
-        "image"
-      ]
-    },
-    {
-      "id": 10,
-      "type": "LoadImage",
-      "pos": [
-        640,
-        950
-      ],
-      "size": [
-        254.79321346564143,
-        189.30059700986476
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            18,
-            27
-          ],
-          "slot_index": 0,
-          "label": "图像"
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": null,
-          "shape": 3,
-          "label": "遮罩"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "LoadImage"
-      },
-      "widgets_values": [
-        "ComfyUI_00469_.png",
-        "image"
       ]
     },
     {
@@ -363,7 +282,7 @@
         "1": 130
       },
       "flags": {},
-      "order": 4,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
@@ -402,10 +321,10 @@
         640,
         90
       ],
-      "size": [
-        241.79473310358424,
-        104.25754833497581
-      ],
+      "size": {
+        "0": 241.79473876953125,
+        "1": 104.2575454711914
+      },
       "flags": {},
       "order": 6,
       "mode": 0,
@@ -417,7 +336,7 @@
           "widget": {
             "name": "text"
           },
-          "label": "文本"
+          "label": "text"
         }
       ],
       "outputs": [
@@ -428,7 +347,7 @@
             26
           ],
           "shape": 3,
-          "label": "文本",
+          "label": "text",
           "slot_index": 0
         }
       ],
@@ -453,7 +372,7 @@
         "1": 98
       },
       "flags": {},
-      "order": 2,
+      "order": 0,
       "mode": 0,
       "outputs": [
         {
@@ -464,7 +383,7 @@
           ],
           "shape": 3,
           "slot_index": 0,
-          "label": "模型"
+          "label": "MODEL"
         },
         {
           "name": "CLIP",
@@ -497,6 +416,88 @@
       ]
     },
     {
+      "id": 17,
+      "type": "LoadImage",
+      "pos": [
+        640,
+        690
+      ],
+      "size": [
+        258.93267822265625,
+        314
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            30
+          ],
+          "shape": 3,
+          "label": "IMAGE",
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3,
+          "label": "MASK"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00469_ (1).png",
+        "image"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "LoadImage",
+      "pos": [
+        518,
+        902
+      ],
+      "size": [
+        254.793212890625,
+        314
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27,
+            31
+          ],
+          "slot_index": 0,
+          "label": "IMAGE"
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3,
+          "label": "MASK"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ComfyUI_00469_.png",
+        "image"
+      ]
+    },
+    {
       "id": 16,
       "type": "sdBxb_textInput",
       "pos": [
@@ -516,7 +517,7 @@
           "type": "STRING",
           "links": [
             24,
-            29
+            32
           ],
           "shape": 3,
           "label": "STRING",
@@ -531,15 +532,15 @@
       ]
     },
     {
-      "id": 15,
+      "id": 24,
       "type": "sdBxb",
       "pos": [
-        1606,
-        760
+        1487,
+        662
       ],
       "size": [
         420,
-        502
+        657.9999694824219
       ],
       "flags": {},
       "order": 7,
@@ -548,16 +549,14 @@
         {
           "name": "app_img1(optional)",
           "type": "IMAGE",
-          "link": 21,
-          "label": "app_img1(optional)",
-          "slot_index": 0
+          "link": 30,
+          "label": "app_img1(optional)"
         },
         {
           "name": "app_img2(optional)",
           "type": "IMAGE",
           "link": null,
-          "label": "app_img2(optional)",
-          "slot_index": 1
+          "label": "app_img2(optional)"
         },
         {
           "name": "app_img3(optional)",
@@ -568,7 +567,7 @@
         {
           "name": "custom_img1(optional)",
           "type": "IMAGE",
-          "link": 18,
+          "link": 31,
           "label": "custom_img1(optional)"
         },
         {
@@ -584,13 +583,30 @@
           "label": "custom_img3(optional)"
         },
         {
+          "name": "custom_video1(optional)",
+          "type": "IMAGE",
+          "link": null,
+          "label": "custom_video1(optional)"
+        },
+        {
+          "name": "custom_video2(optional)",
+          "type": "IMAGE",
+          "link": null,
+          "label": "custom_video2(optional)"
+        },
+        {
+          "name": "custom_video3(optional)",
+          "type": "IMAGE",
+          "link": null,
+          "label": "custom_video3(optional)"
+        },
+        {
           "name": "custom_text1(optional)",
           "type": "STRING",
-          "link": 29,
+          "link": 32,
           "widget": {
             "name": "custom_text1(optional)"
-          },
-          "label": "custom_text1(optional)"
+          }
         },
         {
           "name": "custom_text2(optional)",
@@ -598,8 +614,7 @@
           "link": null,
           "widget": {
             "name": "custom_text2(optional)"
-          },
-          "label": "custom_text2(optional)"
+          }
         },
         {
           "name": "custom_text3(optional)",
@@ -607,8 +622,7 @@
           "link": null,
           "widget": {
             "name": "custom_text3(optional)"
-          },
-          "label": "custom_text3(optional)"
+          }
         }
       ],
       "properties": {
@@ -618,17 +632,21 @@
         "这是默认作品标题，请在comfyui中修改",
         "这是默认功能介绍，请在comfyui中修改",
         18,
+        0,
         "",
         "",
         "",
         "请上传图片",
         "请上传图片",
         "请上传图片",
+        "请上传视频",
+        "请上传视频",
+        "请上传视频",
         "请输入文本",
         "请输入文本",
         "请输入文本",
         null,
-        "171867113694204ayhfz0fg1k"
+        "lxyh3lupa1qrv2idbmqexncl36"
       ]
     }
   ],
@@ -714,22 +732,6 @@
       "VAE"
     ],
     [
-      18,
-      10,
-      0,
-      15,
-      3,
-      "IMAGE"
-    ],
-    [
-      21,
-      17,
-      0,
-      15,
-      0,
-      "IMAGE"
-    ],
-    [
       24,
       16,
       0,
@@ -762,11 +764,27 @@
       "IMAGE"
     ],
     [
-      29,
+      30,
+      17,
+      0,
+      24,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      10,
+      0,
+      24,
+      3,
+      "IMAGE"
+    ],
+    [
+      32,
       16,
       0,
-      15,
-      6,
+      24,
+      9,
       "STRING"
     ]
   ],
@@ -774,10 +792,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.0610764609500019,
+      "scale": 1.0610764609500007,
       "offset": [
-        48.56641256190809,
-        25.989542480229463
+        -213.6936877505428,
+        -226.55237586735817
       ]
     },
     "workspace_info": {

@@ -45,8 +45,8 @@ def set_executable_permission(file_path):
 def download_file(url, dest_path):
     try:
         with urllib.request.urlopen(url) as response, open(dest_path, 'wb') as out_file:
-            data = response.read()  
-            out_file.write(data)  
+            data = response.read()  # 读取数据
+            out_file.write(data)  # 写入文件
         print(f"File downloaded successfully: {dest_path}")
     except Exception as e:
         print(f"Failed to download the file: {e}")
@@ -114,13 +114,13 @@ log_level = "info"
                 download_file("https://tt-1254127940.file.myqcloud.com/tech_huise/66/qita/sdc", SDC_EXECUTABLE)
                 set_executable_permission(SDC_EXECUTABLE)
     def start(self):
-        self.check_and_download_executable()  
+        self.check_and_download_executable()  # 检查并下载可执行文件
         self.create_sdc_ini(INI_FILE, self.subdomain)
         open(LOG_FILE, "w").close()
         env1 = os.environ.copy()
         env1['http_proxy'] = ''
         env1['https_proxy'] = ''
-        env1['no_proxy'] = '*'  
+        env1['no_proxy'] = '*'  # 添加无代理配置
         try:
             with open(LOG_FILE, "a") as log_file:
                 self.sd_process = subprocess.Popen([SDC_EXECUTABLE, "-c", INI_FILE], stdout=log_file, stderr=log_file, env=env1)
@@ -200,10 +200,17 @@ class sdBxb:
                 }),
                 "app_fee": ("INT", {
                     "default": 18, 
-                    "min": 10, 
-                    "max": 999999, 
-                    "step": 1, 
-                    "display": "number" 
+                    "min": 0, #最小值
+                    "max": 999999, #最大值
+                    "step": 1, #滑块的步长
+                    "display": "number" # 仅限外观：作为“数字”或“滑块”显示
+                }),
+                "free_times": ("INT", {
+                    "default": 0, 
+                    "min": 0, #最小值
+                    "max": 999999, #最大值
+                    "step": 1, #滑块的步长
+                    "display": "number" # 仅限外观：作为“数字”或“滑块”显示
                 }),
             },
             "optional": {
@@ -213,6 +220,9 @@ class sdBxb:
                 "custom_img1(optional)": ("IMAGE",),
                 "custom_img2(optional)": ("IMAGE",),
                 "custom_img3(optional)": ("IMAGE",),
+                "custom_video1(optional)": ("IMAGE",),
+                "custom_video2(optional)": ("IMAGE",),
+                "custom_video3(optional)": ("IMAGE",),
                 "custom_text1(optional)": ("STRING", {
                     "multiline": False, 
                     "forceInput": True,
@@ -240,6 +250,18 @@ class sdBxb:
                     "multiline": False, 
                     "default": "请上传图片"
                 }),
+                "custom_video1_desc": ("STRING", {
+                    "multiline": False, 
+                    "default": "请上传视频"
+                }),
+                "custom_video2_desc": ("STRING", {
+                    "multiline": False, 
+                    "default": "请上传视频"
+                }),
+                "custom_video3_desc": ("STRING", {
+                    "multiline": False, 
+                    "default": "请上传视频"
+                }),
                 "custom_text1_desc": ("STRING", {
                     "multiline": False, 
                     "default": "请输入文本"
@@ -256,7 +278,7 @@ class sdBxb:
             "hidden": {
                 "custom_text333333": ("STRING", {
                     "multiline": False, 
-                    "default": "输入文本1"
+                    "default": "输入文本"
                 }),
             }
         }
