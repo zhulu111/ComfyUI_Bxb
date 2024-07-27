@@ -134,4 +134,8 @@ def generate_unique_client_id(port):
     return subdomain
 def find_project_root():
     script_directory = os.path.dirname(os.path.abspath(__file__))
-    return script_directory + '../../../'
+    relative_path = script_directory + '../../../'
+    absolute_path = os.path.abspath(relative_path)
+    if not absolute_path.endswith(os.sep):
+        absolute_path += os.sep
+    return absolute_path
