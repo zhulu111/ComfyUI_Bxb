@@ -1,4 +1,2 @@
 __pycache__/
-sdc/sdc.log
-sdc/sdc.ini
-sdc/sdc.toml
+config/
