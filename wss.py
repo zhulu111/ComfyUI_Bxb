@@ -136,6 +136,8 @@ async def getHistoryPrompt(prompt_id, type_a=''):
                         if media in output:
                             for item in output[media]:
                                 if 'filename' in item:
+                                    if item['subfolder'] is not '':
+                                        item['filename'] =  item['subfolder'] + '/' + item['filename']
                                     result_data.append({"type": 'images', "k": 'file', "v": (
                                                                                                 args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
                                                                                             item['filename']})
