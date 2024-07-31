@@ -255,6 +255,47 @@ def optimized_process_history_data(history_data_1):
             pending = sorted(queue_pending, key=lambda x: int(x[0]))
             pending = [item[1] for item in pending]
     return running, pending
+
+
+async def getMessageHistoryPrompt(result,prompt_id):
+    result_data = [{"type": "str", "k": 'prompt_id', "v": prompt_id}]
+    response_status = None
+    try:
+        result_data.append({"type": "str", "k": 'ok', "v": '1'})
+        for media in ['images', 'gifs', 'videos']:
+            if media in result['output']:
+                for item in result['output'][media]:
+                    if 'filename' in item:
+                        if item['subfolder'] is not '':
+                            item['filename'] =  item['subfolder'] + '/' + item['filename']
+                        result_data.append({"type": 'images', "k": 'file', "v": (
+                                                                                    args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
+                                                                                item['filename']})
+    
+    except Exception as e:
+        print_exception_in_chinese(e)
+        result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': '异常的信息'})
+        response_status = 500
+    submit_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=tt&tech_scene=990001&c=entry&a=wxapp&do=ttapp&r=comfyui.resultv2.formSubmitForComfyUi&m=tech_huise'
+    connector = aiohttp.TCPConnector()
+    async with aiohttp.ClientSession(connector=connector) as session:
+        try:
+            form_res_data = await send_form_data(session, submit_url, result_data, prompt_id)
+        except json.JSONDecodeError as e:
+            print_exception_in_chinese(e)
+            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'json异常的信息'})
+            response_status = 400
+        except Exception as e:
+            print_exception_in_chinese(e)
+            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'aiohttpException异常的信息'})
+            response_status = 500
+        finally:
+            if 'session' in locals():
+                await session.close()
+        return {'status': response_status,
+                'message': '操作完成.' if response_status == 200 else '发生错误.'}
+
+
 async def server2_receive_messages(websocket, message_type, message_json):
     global send_time
     if message_type and message_type != 'crystools.monitor':
@@ -286,6 +327,7 @@ async def server2_receive_messages(websocket, message_type, message_json):
                 'type': 'send',
                 'prompt_id': message_json['data']['prompt_id'],
             })
+            await getMessageHistoryPrompt(message_json['data'],message_json['data']['prompt_id'])
             pass
         if message_type == 'progress':
             pass
