@@ -3,6 +3,7 @@ import json
 import re
 import subprocess
 import time
+from datetime import datetime
 import aiohttp
 import server
 from aiohttp import web
@@ -406,11 +407,35 @@ class sdBxb_textInput:
     @staticmethod
     def main(text):
         return (text,)
+
+
+def replace_time_format_in_filename(filename_prefix):
+    def compute_vars(input):
+        now = datetime.now()
+        custom_formats = {
+            "yyyy": "%Y",
+            "yy": "%y",
+            "MM": "%m",
+            "dd": "%d",
+            "HH": "%H",
+            "mm": "%M",
+            "ss": "%S",
+        }
+        date_formats = re.findall(r"%date:(.*?)%", input)
+        for date_format in date_formats:
+            original_format = date_format
+            for custom_format, strftime_format in custom_formats.items():
+                date_format = date_format.replace(custom_format, strftime_format)
+            formatted_date = now.strftime(date_format)
+            input = input.replace(f"%date:{original_format}%", formatted_date)
+        return input
+    return compute_vars(filename_prefix)
+
 class sdBxb_saveImage:
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
         self.type = "output"
-        self.prefix_append = ""
+        self.prefix_append = "sdBxb_"
         self.compress_level = 4
     @classmethod
     def INPUT_TYPES(s):
@@ -423,7 +448,8 @@ class sdBxb_saveImage:
     OUTPUT_NODE = True
     CATEGORY = "sdBxb"
     def save_images(self, images, filename_prefix="sdBxb"):
-        filename_prefix += self.prefix_append
+        filename_prefix = self.prefix_append + filename_prefix
+        filename_prefix = replace_time_format_in_filename(filename_prefix)
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
             filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
         results = list()
@@ -432,7 +458,7 @@ class sdBxb_saveImage:
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
             metadata = None
             filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
-            file = f"sdBxb_{filename_with_batch_num}_{counter:05}_.png"
+            file = f"{filename_with_batch_num}_{counter:05}_.png"
             img.save(os.path.join(full_output_folder, file), pnginfo=metadata, compress_level=self.compress_level)
             results.append({
                 "filename": file,
