@@ -18,9 +18,7 @@ import websockets
 import threading
 from .public import get_output, write_json_to_file, read_json_from_file, get_address, get_port, \
     generate_unique_client_id, get_port_from_cmdline, args, find_project_root, get_token,get_workflow
-os.environ['http_proxy'] = ''
-os.environ['https_proxy'] = ''
-os.environ['no_proxy'] = '*'
+
 SERVER_1_URI = "wss://tt.9syun.com/wss"
 ADDRESS = get_address()
 PORT = get_port_from_cmdline()
@@ -408,6 +406,13 @@ def generate_md5_uid_timestamp_filename(original_filename):
     filename = md5_hash + file_extension
     return filename
 async def loca_download_image(url, filename):
+    http_proxy = os.environ['http_proxy']
+    https_proxy = os.environ['https_proxy']
+    no_proxy = os.environ['no_proxy']
+    os.environ['http_proxy'] = ''
+    os.environ['https_proxy'] = ''
+    os.environ['no_proxy'] = '*'
+    
     
     dir_name = find_project_root() + 'input'
     no_proxy_handler = urllib.request.ProxyHandler({})
@@ -417,23 +422,39 @@ async def loca_download_image(url, filename):
         response = opener.open(url)
         if response.getcode() == 200:
             full_path = os.path.join(dir_name, file_new_name)
-            if os.path.exists(full_path):
+            if os.path.exists(full_path):     
+                os.environ['http_proxy'] = http_proxy
+                os.environ['https_proxy'] = https_proxy
+                os.environ['no_proxy'] = no_proxy
                 return {
                     'code': True,
                     'filename': file_new_name,
                 }
             with open(full_path, 'wb') as f:
                 f.write(response.read())
+                
+                        
+            os.environ['http_proxy'] = http_proxy
+            os.environ['https_proxy'] = https_proxy
+            os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
             }
         else:
+                        
+            os.environ['http_proxy'] = http_proxy
+            os.environ['https_proxy'] = https_proxy
+            os.environ['no_proxy'] = no_proxy
             return {
                 'code': False,
                 'filename': file_new_name,
             }
     except Exception as e:
+                    
+        os.environ['http_proxy'] = http_proxy
+        os.environ['https_proxy'] = https_proxy
+        os.environ['no_proxy'] = no_proxy
         return {
             'code': False,
             'filename': file_new_name,
