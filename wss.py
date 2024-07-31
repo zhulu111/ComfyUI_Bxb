@@ -134,7 +134,7 @@ async def getHistoryPrompt(prompt_id, type_a=''):
                         if media in output:
                             for item in output[media]:
                                 if 'filename' in item:
-                                    if item['subfolder'] is not '':
+                                    if item['subfolder'] != '':
                                         item['filename'] =  item['subfolder'] + '/' + item['filename']
                                     result_data.append({"type": 'images', "k": 'file', "v": (
                                                                                                 args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
@@ -266,7 +266,7 @@ async def getMessageHistoryPrompt(result,prompt_id):
             if media in result['output']:
                 for item in result['output'][media]:
                     if 'filename' in item:
-                        if item['subfolder'] is not '':
+                        if item['subfolder'] != '':
                             item['filename'] =  item['subfolder'] + '/' + item['filename']
                         result_data.append({"type": 'images', "k": 'file', "v": (
                                                                                     args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
@@ -604,10 +604,7 @@ async def process_json_elements(json_data, prompt_data,workflow, jilu_id):
     await asyncio.gather(*tasks)
     try:
         result = queue_prompt(json_data,workflow, new_client_w_id)
-        if 'node_errors' in result:
-            if result['node_errors']:
-                raise Exception('发送指令失败')
-        try:
+        if 'prompt_id' in result:
             websocket_queue.appendleft({
                 "conn_identifier": 1,
                 "data": {
@@ -619,15 +616,15 @@ async def process_json_elements(json_data, prompt_data,workflow, jilu_id):
                     }
                 },
             })
-        except Exception as e:
-            print_exception_in_chinese(e)
-        task_queue_3[result['prompt_id']] = {
-            'jilu_id': jilu_id
-        }
-        return {
-            'code': 1,
-            'prompt_id': result['prompt_id']
-        }
+            task_queue_3[result['prompt_id']] = {
+                'jilu_id': jilu_id
+            }
+            return {
+                'code': 1,
+                'prompt_id': result['prompt_id']
+            }
+        else: 
+            raise Exception('发送指令失败')
     except Exception as e:
         print_exception_in_chinese(e)
         websocket_queue.appendleft({
