@@ -448,9 +448,9 @@ def generate_md5_uid_timestamp_filename(original_filename):
     filename = md5_hash + file_extension
     return filename
 async def loca_download_image(url, filename):
-    http_proxy = os.environ['http_proxy']
-    https_proxy = os.environ['https_proxy']
-    no_proxy = os.environ['no_proxy']
+    http_proxy = os.environ.get('http_proxy')
+    https_proxy = os.environ.get('https_proxy')
+    no_proxy = os.environ.get('no_proxy')
     os.environ['http_proxy'] = ''
     os.environ['https_proxy'] = ''
     os.environ['no_proxy'] = '*'
@@ -464,10 +464,11 @@ async def loca_download_image(url, filename):
         response = opener.open(url)
         if response.getcode() == 200:
             full_path = os.path.join(dir_name, file_new_name)
-            if os.path.exists(full_path):     
-                os.environ['http_proxy'] = http_proxy
-                os.environ['https_proxy'] = https_proxy
-                os.environ['no_proxy'] = no_proxy
+            if os.path.exists(full_path):    
+                if http_proxy is not None: 
+                    os.environ['http_proxy'] = http_proxy
+                    os.environ['https_proxy'] = https_proxy
+                    os.environ['no_proxy'] = no_proxy
                 return {
                     'code': True,
                     'filename': file_new_name,
@@ -476,27 +477,28 @@ async def loca_download_image(url, filename):
                 f.write(response.read())
                 
                         
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
+            if http_proxy is not None: 
+                os.environ['http_proxy'] = http_proxy
+                os.environ['https_proxy'] = https_proxy
+                os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
             }
         else:
-                        
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
+            if http_proxy is not None: 
+                os.environ['http_proxy'] = http_proxy
+                os.environ['https_proxy'] = https_proxy
+                os.environ['no_proxy'] = no_proxy
             return {
                 'code': False,
                 'filename': file_new_name,
             }
     except Exception as e:
-                    
-        os.environ['http_proxy'] = http_proxy
-        os.environ['https_proxy'] = https_proxy
-        os.environ['no_proxy'] = no_proxy
+        if http_proxy is not None:    
+            os.environ['http_proxy'] = http_proxy
+            os.environ['https_proxy'] = https_proxy
+            os.environ['no_proxy'] = no_proxy
         return {
             'code': False,
             'filename': file_new_name,
