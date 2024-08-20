@@ -262,6 +262,10 @@ def optimized_process_history_data(history_data_1):
 async def getMessageHistoryPrompt(result, prompt_id):
     result_data = [{"type": "str", "k": 'prompt_id', "v": prompt_id}]
     response_status = None
+    if 'output' not in result:
+        return
+    if result['output'] is None:
+        return
     try:
         file_num = 0
         result_data.append({"type": "str", "k": 'ok', "v": '1'})
