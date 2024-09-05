@@ -457,6 +457,7 @@ async def server2_receive_messages(websocket, message_type, message_json):
             })
             pass
         if message_type == 'executed':
+            time.sleep(1)
             task_queue_2.put({
                 'type': 'send',
                 'prompt_id': message_json['data']['prompt_id'],
@@ -465,6 +466,7 @@ async def server2_receive_messages(websocket, message_type, message_json):
         if message_type == 'progress':
             pass
         if message_type == 'execution_cached' and 'prompt_id' in message_json['data']:
+            time.sleep(1)
             task_queue_2.put({
                 'type': 'send',
                 'prompt_id': message_json['data']['prompt_id'],
