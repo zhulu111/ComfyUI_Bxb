@@ -1,23 +1,24 @@
 import asyncio
-import hashlib
 import json
 import os
 import queue
-import random
 import time
-import traceback
 import urllib
 import uuid
 import aiohttp
 import urllib.request
 import urllib.parse
 import collections
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock, Condition
 import websockets
 import threading
-from .public import get_output, write_json_to_file, read_json_from_file, get_address, get_port, \
-    generate_unique_client_id, get_port_from_cmdline, args, find_project_root, get_token, get_workflow
+from .public import (get_output, write_json_to_file, get_address, get_port, get_port_from_cmdline, args, \
+                     find_project_root, get_workflow, get_base_url, get_filenames, read_json_file,
+                     generate_large_random_number, generate_md5_uid_timestamp_filename, loca_download_image, print_exception_in_chinese, determine_file_type, get_upload_url, send_binary_data, remove_query_parameters, combine_images, send_binary_data_async, find_project_custiom_nodes_path)
+from .utils import get_video_dimensions, get_image_dimensions, extract_frames
+import folder_paths
+output_directory = folder_paths.get_output_directory()
 SERVER_1_URI = "wss://tt.9syun.com/wss"
 ADDRESS = get_address()
 PORT = get_port_from_cmdline()
@@ -64,15 +65,69 @@ class MonitoredThreadPoolExecutor(ThreadPoolExecutor):
     def active_tasks(self):
         with self._lock:
             return self._active_tasks
-executor = MonitoredThreadPoolExecutor(max_workers=20)
-def print_exception_in_chinese(e):
-    
-    tb = traceback.extract_tb(e.__traceback__)
-    if tb:
-        filename, line_number, function_name, text = tb[-1]
-        traceback.print_exception(type(e), e, e.__traceback__)
-    else:
-        pass
+executor = MonitoredThreadPoolExecutor(max_workers=40)
+class UploadManager:
+    def __init__(self, session, url_result, post_file_arr, post_uir_arr, base_url):
+        self.session = session
+        self.url_result = url_result
+        self.post_file_arr = post_file_arr
+        self.post_uir_arr = post_uir_arr
+        self.binary_arr = ['frame', 'auth']
+        self.base_url = base_url
+        self.json_arr = []
+        self.auth_arr = []
+    def prepare_tasks(self):
+        tasks = []
+        for index, item1 in enumerate(self.url_result['data']['data']):
+            main_url = item1['url']
+            main_post_file = self.post_file_arr[index]['url']
+            main_post_uir = self.post_uir_arr[index]['url']
+            is_binary = item1['type'] in self.binary_arr
+            mime_type = self.post_uir_arr[index]['url']
+            if not is_binary:
+                main_post_file = f"{self.base_url}/{main_post_file}"
+            tasks.append((main_url, main_post_file, is_binary, mime_type, index, False, 0))
+            for key, value in enumerate(item1.get('urls', [])):
+                url = value['url']
+                post_file = self.post_file_arr[index]['urls'][key]['url']
+                post_uir = self.post_uir_arr[index]['urls'][key]['url']
+                file_type = self.post_uir_arr[index]['urls'][key]['type']
+                is_binary = file_type in self.binary_arr
+                if not is_binary:
+                    post_file = f"{self.base_url}/{post_file}"
+                tasks.append((url, post_file, is_binary, post_uir, index, True, key))
+        return tasks
+    def upload_task(self, *args):
+        import time
+        start_time = time.time()
+        upload_url, post_file, is_binary, mime_type, index, is_sub_url, key = args
+        send_binary_data_async(upload_url, post_file, is_binary, mime_type)
+        cleaned_url = remove_query_parameters(upload_url)
+        elapsed_time = time.time() - start_time
+        return cleaned_url, index, is_sub_url, key, elapsed_time, is_binary
+    def start_sync(self):
+        tasks = self.prepare_tasks()
+        results = []
+        with ThreadPoolExecutor(max_workers=15) as executor1:
+            futures = {executor1.submit(self.upload_task, *task): task for task in tasks}
+            for future in as_completed(futures):
+                try:
+                    cleaned_url, index, is_sub_url, key, elapsed_time, is_binary = future.result()
+                    if is_sub_url:
+                        self.url_result['data']['data'][index]['urls'][key]['url'] = cleaned_url
+                    else:
+                        self.url_result['data']['data'][index]['url'] = cleaned_url
+                    results.append((cleaned_url, index, is_sub_url, key))
+                except Exception as e:
+                    pass
+        return results
+    def get(self):
+        for index, item1 in enumerate(self.url_result['data']['data']):
+            if item1['type'] == 'auth':
+                self.auth_arr.append(item1)
+            else:
+                self.json_arr.append(item1)
+        return self.json_arr, self.auth_arr, self.url_result['data']['data']
 async def websocket_connect(uri, conn_identifier):
     global websocket_conn1, websocket_conn2, send_time
     reconnect_delay = RECONNECT_DELAY
@@ -122,6 +177,9 @@ async def getHistoryPrompt(prompt_id, type_a=''):
     result_data = [{"type": "str", "k": 'prompt_id', "v": prompt_id}]
     result = get_history_prompt(prompt_id)
     response_status = None
+    post_uir_arr = []
+    post_file_arr = []
+    image_info_list = []
     try:
         if prompt_id in result:
             result = result[prompt_id]
@@ -129,19 +187,62 @@ async def getHistoryPrompt(prompt_id, type_a=''):
             if status.get('completed', False):
                 file_num = 0
                 result_data.append({"type": "str", "k": 'ok', "v": '1'})
-                for output in result.get('outputs', {}).values():
+                for index, output in enumerate(result.get('outputs', {}).values()):
                     for media in ['images', 'gifs', 'videos']:
                         if media in output:
                             for item in output[media]:
-                                if 'filename' in item:
-                                    if item['subfolder'] != '' and item['type'] == 'output':
+                                if 'filename' in item and item['type'] == 'output':
+                                    if item['subfolder'] != '':
                                         item['filename'] = item['subfolder'] + '/' + item['filename']
                                     file_num += 1
-                                    result_data.append({"type": 'images', "k": 'file', "v": (
-                                                                                                args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
-                                                                                            item['filename']})
+                                    item_url_info = {}
+                                    mine_type, file_type = determine_file_type(folder_paths.get_output_directory() + '/' + item['filename'])
+                                    if file_type == 'video':
+                                        width1, height1, size_mb = get_video_dimensions(folder_paths.get_output_directory() + '/' + item['filename'])
+                                    else:
+                                        width1, height1, size_mb = get_image_dimensions(folder_paths.get_output_directory() + '/' + item['filename'], {'TIMESTAMP': str(time.time()), 'PROMPTID': str(prompt_id)})
+                                    item_url_info = {
+                                        'url': mine_type,
+                                        'file_type': file_type,
+                                        'width': width1,
+                                        'height': height1,
+                                        'ratio': height1 / width1,
+                                        'urls': [],
+                                        'type': 'result'
+                                    }
+                                    item_url_file = {
+                                        'url': item['filename'],
+                                        'urls': [],
+                                        'type': 'result'
+                                    }
+                                    if file_type == 'video':
+                                        frame_contents = extract_frames(folder_paths.get_output_directory() + '/' + item['filename'])
+                                        for k, frame_content in enumerate(frame_contents):
+                                            image_info_list.append({
+                                                'type': 'binary',
+                                                'content': frame_content
+                                            })
+                                            if k == 0:
+                                                item_url_info['urls'].append({
+                                                    'url': 'image/png',
+                                                    'width': width1,
+                                                    'height': height1,
+                                                    'ratio': height1 / width1,
+                                                    'type': 'frame'
+                                                })
+                                                item_url_file['urls'].append({
+                                                    'url': frame_content,
+                                                    'type': 'frame'
+                                                })
+                                    else:
+                                        image_info_list.append({
+                                            'type': 'path',
+                                            'content': folder_paths.get_output_directory() + '/' + item['filename']
+                                        })
+                                    post_uir_arr.append(item_url_info)
+                                    post_file_arr.append(item_url_file)
                 if file_num == 0:
-                    result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': '制作失败'})
+                    return
                     pass
             else:
                 result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'completed状态不对'})
@@ -155,10 +256,37 @@ async def getHistoryPrompt(prompt_id, type_a=''):
         print_exception_in_chinese(e)
         result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': '异常的信息'})
         response_status = 500
-    submit_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=tt&tech_scene=990001&c=entry&a=wxapp&do=ttapp&r=comfyui.resultv2.formSubmitForComfyUi&m=tech_huise'
+    if len(image_info_list) > 0:
+        binary_data_list = combine_images(image_info_list)
+        for binary_data in binary_data_list:
+            post_uir_arr.append({
+                'url': 'image/png',
+                'file_type': 'image',
+                'width': '',
+                'height': '',
+                'ratio': 1,
+                'upload_type': 0,
+                'urls': [],
+                'type': 'auth',
+                'index': 0
+            })
+            post_file_arr.append({
+                'url': binary_data,
+                'upload_type': 0,
+                'urls': [],
+                'type': 'auth',
+                'index': 0
+            })
+    submit_url = get_base_url() + 'comfyui.resultv2.formSubmitForComfyUi&m=tech_huise'
     connector = aiohttp.TCPConnector()
     async with aiohttp.ClientSession(connector=connector) as session:
         try:
+            url_result = await get_upload_url(post_uir_arr, new_client_w_id, session, 2)
+            manager = UploadManager(session, url_result, post_file_arr, post_uir_arr, folder_paths.get_output_directory())
+            manager.start_sync()
+            json_arr, auth_arr, post_arr = manager.get()
+            result_data.append({"type": "str", "k": 'images', "v": json.dumps(json_arr)})
+            result_data.append({"type": "str", "k": 'auth', "v": json.dumps(auth_arr)})
             form_res_data = await send_form_data(session, submit_url, result_data, prompt_id)
         except json.JSONDecodeError as e:
             print_exception_in_chinese(e)
@@ -276,9 +404,7 @@ async def getMessageHistoryPrompt(result, prompt_id):
                         if item['subfolder'] != '':
                             item['filename'] = item['subfolder'] + '/' + item['filename']
                         file_num += 1
-                        result_data.append({"type": 'images', "k": 'file', "v": (
-                                                                                    args.output_directory if args.output_directory else find_project_root() + 'output') + '/' +
-                                                                                item['filename']})
+                        result_data.append({"type": 'images', "k": 'file', "v": folder_paths.get_output_directory() + '/' + item['filename']})
         if file_num == 0:
             return
             pass
@@ -286,7 +412,7 @@ async def getMessageHistoryPrompt(result, prompt_id):
         print_exception_in_chinese(e)
         result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': '异常的信息'})
         response_status = 500
-    submit_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=tt&tech_scene=990001&c=entry&a=wxapp&do=ttapp&r=comfyui.resultv2.formSubmitForComfyUi&m=tech_huise'
+    submit_url = get_base_url() + 'comfyui.resultv2.formSubmitForComfyUi&m=tech_huise'
     connector = aiohttp.TCPConnector()
     async with aiohttp.ClientSession(connector=connector) as session:
         try:
@@ -331,19 +457,17 @@ async def server2_receive_messages(websocket, message_type, message_json):
             })
             pass
         if message_type == 'executed':
-            task_queue_2.put({
-                'type': 'send',
-                'prompt_id': message_json['data']['prompt_id'],
-            })
-            await getMessageHistoryPrompt(message_json['data'], message_json['data']['prompt_id'])
             pass
         if message_type == 'progress':
             pass
         if message_type == 'execution_cached' and 'prompt_id' in message_json['data']:
+            pass
+        if message_type == 'execution_success' and 'prompt_id' in message_json['data']:
             task_queue_2.put({
                 'type': 'send',
                 'prompt_id': message_json['data']['prompt_id'],
             })
+            pass
 async def receive_messages(websocket, conn_identifier):
     
     if websocket.open:
@@ -388,21 +512,13 @@ def get_history():
             'queue_running': [],
             'queue_pending': [],
         }
-def get_filenames(directory):
-    if os.path.exists(directory):
-        all_entries = os.listdir(directory)
-        all_entries = [name for name in all_entries if os.path.isfile(os.path.join(directory, name))]
-        all_entries = [name.split('.')[0] for name in all_entries]
-        return all_entries
-    else:
-        return []
 send_time = '0'
 def get_time():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 async def send_heartbeat_to_server2():
     running, pending = optimized_process_history_data(history_data)
     try:
-        file_names = get_filenames(find_project_root() + 'custom_nodes/ComfyUI_Bxb/config/json/api/')
+        file_names = get_filenames(find_project_custiom_nodes_path() + 'ComfyUI_Bxb/config/json/api/')
         websocket_queue.append({
             "conn_identifier": 1,
             "data": {
@@ -437,76 +553,19 @@ async def run_websocket_task_in_loop():
                             await websocket_conn3.send(json.dumps(websocket_info['data']))
             else:
                 loop_num = loop_num + 1
-                if loop_num > 100:
+                if loop_num > 1000:
                     loop_num = 0
                     await websocket_conn3.send(json.dumps({
                         'time': get_time(),
+                        'type': 'crystools.line',
+                        'data': {
+                            'client_id': new_client_w_id,
+                        }
                     }))
         except Exception as e:
             break
         finally:
             await asyncio.sleep(0.02)
-def generate_md5_uid_timestamp_filename(original_filename):
-    
-    timestamp = str(time.time())
-    random_number = str(generate_large_random_number(32))
-    combined_string = original_filename + timestamp + random_number
-    md5_hash = hashlib.md5(combined_string.encode('utf-8')).hexdigest()
-    file_extension = os.path.splitext(original_filename)[1]
-    filename = md5_hash + file_extension
-    return filename
-async def loca_download_image(url, filename):
-    
-    http_proxy = os.environ.get('http_proxy', '')
-    https_proxy = os.environ.get('https_proxy', '')
-    no_proxy = os.environ.get('no_proxy', '*')
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = '*'
-    dir_name = find_project_root() + 'input'
-    no_proxy_handler = urllib.request.ProxyHandler({})
-    opener = urllib.request.build_opener(no_proxy_handler)
-    file_new_name = generate_md5_uid_timestamp_filename(filename)
-    try:
-        response = opener.open(url)
-        if response.getcode() == 200:
-            full_path = os.path.join(dir_name, file_new_name)
-            if os.path.exists(full_path):
-                os.environ['http_proxy'] = http_proxy
-                os.environ['https_proxy'] = https_proxy
-                os.environ['no_proxy'] = no_proxy
-                return {
-                    'code': True,
-                    'filename': file_new_name,
-                }
-            with open(full_path, 'wb') as f:
-                f.write(response.read())
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
-            return {
-                'code': True,
-                'filename': file_new_name,
-            }
-        else:
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
-            return {
-                'code': False,
-                'filename': file_new_name,
-            }
-    except Exception as e:
-        os.environ['http_proxy'] = http_proxy
-        os.environ['https_proxy'] = https_proxy
-        os.environ['no_proxy'] = no_proxy
-        return {
-            'code': False,
-            'filename': file_new_name,
-        }
-def generate_large_random_number(num_bits):
-    
-    return random.getrandbits(num_bits)
 def queue_prompt(prompt, workflow, new_client_id):
     try:
         if websocket_conn2 is not None and websocket_conn2.open:
@@ -523,8 +582,15 @@ def queue_prompt(prompt, workflow, new_client_id):
     except Exception as e:
         print_exception_in_chinese(e)
         return {}
+def find_element_by_key(array, key):
+    key_int = int(key)
+    for element in array:
+        if element.get('id') == key_int:
+            return element
+    return None
 async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
     global websocket_conn1
+    line_json = read_json_file('https://tt.9syun.com/seed.json')
     try:
         if 'cs_imgs' in prompt_data and prompt_data['cs_imgs']:
             for item in prompt_data['cs_imgs']:
@@ -551,6 +617,22 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
         if 'cs_texts' in prompt_data and prompt_data['cs_texts']:
             for item in prompt_data['cs_texts']:
                 json_data[str(item['node'])]['inputs']['text'] = item['value']
+        if 'check_output_item' in prompt_data and prompt_data['check_output_item']:
+            check_output_item = prompt_data['check_output_item']
+            for index, item in enumerate(check_output_item):
+                class_type_name = f"{item['options']['class_type']}.{item['options']['name']}"
+                if class_type_name in line_json['video_load'] or class_type_name in line_json['image_load']:
+                    if item['custom_value']:
+                        filename = os.path.basename(item['custom_value'])
+                        download_info = await loca_download_image(item['custom_value'], filename)
+                        download_status = download_info['code']
+                        file_new_name = download_info['filename']
+                        if not download_status:
+                            raise Exception('图片下载失败')
+                        json_data[item['options']['node']]['inputs'][item['options']['name']] = file_new_name
+                else:
+                    json_data[item['options']['node']]['inputs'][item['options']['name']] = item['custom_value']
+            pass
     except KeyError as e:
         print_exception_in_chinese(e)
         websocket_queue.appendleft({
@@ -583,14 +665,33 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
             'code': 0,
             'jilu_id': jilu_id
         }
-    async def print_item(key, value):
+    async def print_item(now_index, key, value):
         try:
-            if value['class_type'] == 'KSampler' and 'inputs' in json_data[key]:
-                json_data[key]['inputs']['seed'] = generate_large_random_number(15)
-            if value['class_type'] == 'VHS_VideoCombine' and 'inputs' in json_data[key] and 'crf' in json_data[key][
-                'inputs']:
-                if json_data[key]['inputs']['crf'] == 0:
-                    json_data[key]['inputs']['crf'] = 1
+            if value['class_type'] in line_json['seed'] and line_json['seed'][value['class_type']]:
+                check_value = line_json['seed'][value['class_type']]
+                workflow_node = workflow['extra_data']['extra_pnginfo']['workflow']['nodes']
+                workflow_node_info = find_element_by_key(workflow_node, key)
+                try:
+                    if workflow_node_info:
+                        default_seed_value = json_data[key]['inputs'][check_value['seed']]
+                        if type(default_seed_value) == int or type(default_seed_value) == float or type(
+                                default_seed_value) == str:
+                            default_seed_value = float(default_seed_value)
+                            check_value_type = check_value['values'][
+                                workflow_node_info['widgets_values'][check_value['widgets_index']]]
+                            if check_value_type == '+':
+                                default_seed_value = default_seed_value + check_value['step']
+                            if check_value_type == '-':
+                                default_seed_value = default_seed_value - check_value['step']
+                            if check_value_type == '*':
+                                default_seed_value = generate_large_random_number(15)
+                            json_data[key]['inputs'][check_value['seed']] = default_seed_value
+                except (KeyError, IndexError, TypeError) as e:
+                    print_exception_in_chinese(e)
+                    pass
+            if value['class_type'] in line_json['crf'] and line_json['crf'][value['class_type']]:
+                if line_json['crf'][value['class_type']] in json_data[key]['inputs'] and json_data[key]['inputs'][line_json['crf'][value['class_type']]] == 0:
+                    json_data[key]['inputs'][line_json['crf'][value['class_type']]] = 1
         except Exception as e:
             print_exception_in_chinese(e)
             websocket_queue.appendleft({
@@ -599,14 +700,14 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
                     'type': 'crystools.prompt_error',
                     'data': {
                         'jilu_id': jilu_id,
-                        'msg': '发送指令失败3'
+                        'msg': '发送指令失败'
                     }
                 },
             })
-    tasks = [print_item(key, value) for key, value in json_data.items()]
+    tasks = [print_item(index, key, value) for index, (key, value) in enumerate(json_data.items())]
     await asyncio.gather(*tasks)
     try:
-        result = queue_prompt(json_data,workflow, new_client_w_id)
+        result = queue_prompt(json_data, workflow, new_client_w_id)
         if 'prompt_id' in result:
             websocket_queue.appendleft({
                 "conn_identifier": 1,
@@ -636,7 +737,7 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
                 'type': 'crystools.prompt_error',
                 'data': {
                     'jilu_id': jilu_id,
-                    'msg': '发送指令失败3'
+                    'msg': '发送指令失败'
                 }
             },
         })

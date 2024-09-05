@@ -1,2 +1,8 @@
-websockets
+Pillow
+tqdm
 aiohttp
+filetype
+websockets
+aiohttp-cors
+requests
+numpy

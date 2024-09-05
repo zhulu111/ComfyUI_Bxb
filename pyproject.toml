@@ -2,7 +2,7 @@
 name = "comfyui_bxb"
 description = "sdBxb, a tool that converts ComfyUI workflows into WeChat Mini Program, Douyin Mini Program, and H5 with one click, and supports payments."
 version = "1.0.0"
-license = "LICENSE"
+license = { file = "LICENSE" }
 
 [project.urls]
 Repository = "https://github.com/zhulu111/ComfyUI_Bxb"
@@ -12,3 +12,4 @@ Repository = "https://github.com/zhulu111/ComfyUI_Bxb"
 PublisherId = ""
 DisplayName = "ComfyUI_Bxb"
 Icon = ""
+

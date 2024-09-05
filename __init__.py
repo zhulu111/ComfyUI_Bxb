@@ -1,14 +1,19 @@
-import asyncio
 import json
 import re
-import subprocess
 import time
 from datetime import datetime
+from .install import *
+from .mime import add_mime_types
+add_mime_types()
+from .utils import get_ffmpeg_executable, do_zhutu, get_video_dimensions, get_image_dimensions, extract_frames
+import concurrent.futures
+import asyncio
 import aiohttp
+import aiohttp_cors
 import server
+import folder_paths
 from aiohttp import web
 from collections import deque
-from .install import *
 import os
 import uuid
 import hashlib
@@ -16,13 +21,24 @@ import platform
 import stat
 import urllib.request
 import numpy as np
-from .wss import thread_run, update_worker_flow
-from .public import get_port_from_cmdline, set_token, get_token, get_version, \
-    set_openid, get_openid, find_project_root, args
+import shutil
+from .wss import thread_run, update_worker_flow, UploadManager
+from .public import get_port_from_cmdline, set_token, is_aspect_ratio_within_limit, get_version, \
+    set_openid, get_openid, find_project_root, args, get_base_url, get_filenames, get_output, get_workflow, \
+    find_project_bxb, loca_download_image, delete_workflow, read_json_file, determine_file_type, print_exception_in_chinese, remove_query_parameters, combine_images, get_upload_url, send_binary_data, async_download_image, find_project_custiom_nodes_path
+ffmpeg_exe_path = get_ffmpeg_executable()
+temp_path = find_project_custiom_nodes_path() + 'ComfyUI_Bxb/temp_bxb/'
+if os.path.exists(temp_path):
+    shutil.rmtree(temp_path)
+os.makedirs(temp_path, exist_ok=True)
 import threading
-import folder_paths
 from PIL import Image
-input_directory = args.input_directory if args.input_directory else find_project_root() + 'input'
+input_directory = folder_paths.get_input_directory()
+os.makedirs(input_directory, exist_ok=True)
+save_input_directory = input_directory + '/temp'
+os.makedirs(save_input_directory, exist_ok=True)
+def get_time():
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 def get_mac_address():
     mac = uuid.getnode()
     return ':'.join(('%012X' % mac)[i:i + 2] for i in range(0, 12, 2))
@@ -43,7 +59,6 @@ def download_file(url, dest_path):
         with urllib.request.urlopen(url) as response, open(dest_path, 'wb') as out_file:
             data = response.read()
             out_file.write(data)
-        print(f"File downloaded successfully: {dest_path}")
     except Exception as e:
         print(f"Failed to download the file: {e}")
 PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +79,6 @@ class SDClient:
         self.connected = False
         self.monitoring_thread = None
         self.stop_monitoring = False
-
     def create_sdc_ini(self, file_path, subdomain):
         # 生成 sdc.toml 文件
         config_content = f"""
@@ -109,7 +123,6 @@ log_level = "info"
     def check_and_download_executable(self):
         if platform.system() != "Windows":
             if not os.path.exists(SDC_EXECUTABLE):
-                print("SDC executable not found, downloading...")
                 download_file("https://tt-1254127940.file.myqcloud.com/tech_huise/66/qita/sdc", SDC_EXECUTABLE)
                 set_executable_permission(SDC_EXECUTABLE)
     def start(self):
@@ -184,7 +197,7 @@ def extract_and_verify_images(output):
             image_node = output[str(img_key)]
             image_path = image_node.get("inputs", {}).get("image")
             if image_path:
-                if verify_image_exists(input_directory + '/' + image_path):
+                if verify_image_exists(folder_paths.get_input_directory() + '/' + image_path):
                     results[app_img_key] = {"image_path": image_path, "status": "图片存在"}
                 else:
                     err = err + 1
@@ -214,10 +227,20 @@ async def tech_zhulu(request):
         json_data['postData']['subdomain'] = subdomain
     async with aiohttp.ClientSession() as session:
         json_data['version'] = get_version()
-        techsid = get_token()
-        upload_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=wx&c=entry&a=wxapp&tech_client=sj&do=ttapp&m=tech_huise&r=' + \
-                     json_data['r'] + '&techsid=we7sid-' + techsid
+        techsid = json_data.get('comfyui_tid', '')
+        upload_url = get_base_url() + json_data['r'] + '&techsid=we7sid-' + techsid
         if json_data['r'] == 'comfyui.apiv2.upload':
+            err_info = {
+                "errno": 0,
+                "message": "ERROR",
+                "data": {
+                    "data": {
+                        "message": '该节点已废弃,请刷新浏览器后,点击屏幕右上角封装应用',
+                        "code": 0,
+                    }
+                }
+            }
+            return web.Response(status=200, text=json.dumps(err_info))
             output = json_data['postData']['output']
             workflow = json_data['postData']['workflow']
             try:
@@ -240,7 +263,7 @@ async def tech_zhulu(request):
                 form_data.add_field('json_data', json.dumps(json_data))
                 if 'zhutus' in json_data['postData']:
                     for item in json_data['postData']['zhutus']:
-                        with open(input_directory + '/' + item, 'rb') as f:
+                        with open(folder_paths.get_input_directory() + '/' + item, 'rb') as f:
                             file_content = f.read()
                         form_data.add_field('zhutus[]', file_content, filename=os.path.basename(item),
                                             content_type='application/octet-stream')
@@ -275,20 +298,635 @@ async def tech_zhulu(request):
                     try:
                         result = await resp.text()
                         result = json.loads(result)
-                        result_data = result['data']
-                        if isinstance(result_data, dict) and json_data[
-                            'r'] == 'comfyui.apiv2.code' and 'data' in result_data and 'techsid' in result_data['data'][
-                            'data']:
-                            if len(result_data['data']['data']['techsid']) > len('12345'):
-                                set_token(result_data['data']['data']['techsid'])
-                            pass
                         return web.json_response(result)
                     except json.JSONDecodeError as e:
                         return web.Response(status=resp.status, text=await resp.text())
                 else:
                     return web.Response(status=resp.status, text=await resp.text())
+@server.PromptServer.instance.routes.post("/manager/auth")
+async def auth(request):
+    return web.json_response({'message': 'success', 'token': ''})
+    pass
+@server.PromptServer.instance.routes.post("/manager/get_seep")
+async def get_seep(request):
+    line_json = read_json_file('https://tt.9syun.com/seed.json')
+    return web.json_response({'message': 'success', 'data': line_json})
+@server.PromptServer.instance.routes.post("/manager/download_fileloadd")
+async def download_fileloadd(request):
+    json_data = await request.json()
+    if (json_data['url']):
+        filename = os.path.basename(json_data['url'])
+        download_info = await loca_download_image(json_data['url'], filename, 1)
+        if download_info['code']:
+            file_new_name = download_info['filename']
+            return web.Response(status=200, text=json.dumps({
+                "code": 1,
+                "msg": "文件下载成功",
+                "data": {
+                    "filename": file_new_name,
+                    "subfolder": '',
+                    "type": 'input'
+                }
+            }))
+        return web.Response(status=500, text=json.dumps({
+            "code": 0,
+            "msg": "文件下载失败",
+            "data": {
+            }
+        }))
+    else:
+        return web.Response(status=500, text=json.dumps({
+            "code": 0,
+            "msg": "文件下载失败",
+            "data": {
+            }
+        }))
+    pass
+async def process_download_tasks(yu_load_images):
+    
+    loop = asyncio.get_event_loop()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        download_tasks = []
+        for image_info in yu_load_images:
+            download_tasks.append(loop.run_in_executor(executor, async_download_image, image_info['left_image'], image_info['left_image'], 1))
+            download_tasks.append(loop.run_in_executor(executor, async_download_image, image_info['right_image'], image_info['right_image'], 1))
+        download_results = await asyncio.gather(*download_tasks)
+        index = 0
+        for image_info in yu_load_images:
+            left_info = download_results[index]
+            right_info = download_results[index + 1]
+            index += 2
+            if left_info['code']:
+                image_info['left_image'] = {
+                    "filename": left_info['filename'],
+                    "subfolder": '',
+                    "type": 'input'
+                }
+            else:
+                image_info['left_image'] = ''
+            if right_info['code']:
+                image_info['right_image'] = {
+                    "filename": right_info['filename'],
+                    "subfolder": '',
+                    "type": 'input'
+                }
+            else:
+                image_info['right_image'] = ''
+    return yu_load_images
+def process_zhutu(image_info, base_image1, base_image2, base_image3):
+    
+    if image_info['left_image'] is not '':
+        left_image = image_info['left_image'].get('filename', '')
+    else:
+        left_image = image_info['left_image']
+    if image_info['right_image'] is not '':
+        right_image = image_info['right_image'].get('filename', '')
+    else:
+        right_image = image_info['right_image']
+    overlay_img = ''
+    if left_image != '':
+        left_image = folder_paths.get_input_directory() + '/' + left_image
+        overlay_img = base_image1
+    if right_image != '':
+        right_image = folder_paths.get_input_directory() + '/' + right_image
+        overlay_img = base_image2
+    if left_image != '' and right_image != '':
+        overlay_img = base_image3
+    zhutu_info = do_zhutu(left_image, right_image, overlay_img)
+    if zhutu_info['code'] == 0:
+        image_info['result'] = {
+            "code": 0,
+            "msg": "成功",
+            "data": zhutu_info['data'],
+            "filename": zhutu_info['filename'],
+            'type': zhutu_info['type'],
+            'mime_type': 'image/png' if zhutu_info['type'] == 'image' else 'video/mp4',
+            'size': zhutu_info['size'],
+            'base_size': zhutu_info['base_size']
+        }
+    else:
+        image_info['result'] = {
+            "code": 1,
+            "msg": zhutu_info['error'],
+            "data": {}
+        }
+    return image_info
+async def process_images_multithread(updated_images, base_image1, base_image2, base_image3):
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        loop = asyncio.get_event_loop()
+        tasks = [
+            loop.run_in_executor(
+                executor,
+                process_zhutu,
+                image_info,
+                base_image1,
+                base_image2,
+                base_image3
+            )
+            for image_info in updated_images
+        ]
+        results = await asyncio.gather(*tasks)
+        return results
+@server.PromptServer.instance.routes.post("/manager/download_fileloads")
+async def download_fileloads(request):
+    yu_load_images = await request.json()
+    updated_images = await process_download_tasks(yu_load_images)
+    base_image = find_project_bxb() + 'assets/image/bg-image.png'
+    base_image1 = find_project_bxb() + 'assets/image/bg-image1.png'
+    base_image2 = find_project_bxb() + 'assets/image/bg-image2.png'
+    base_image3 = find_project_bxb() + 'assets/image/bg-image3.png'
+    processed_images = await process_images_multithread(updated_images, base_image1, base_image2, base_image3)
+    return web.Response(status=200, text=json.dumps({
+        "code": 1,
+        "msg": "文件下载成功",
+        "data": processed_images
+    }))
+@server.PromptServer.instance.routes.post("/manager/image_serialize")
+async def image_serialize(request):
+    json_data = await request.json()
+    out_put_directory = folder_paths.get_output_directory()
+    base_serialized = 0
+    for index, item in enumerate(json_data):
+        if item['info']['subfolder'] != '':
+            item['info']['filename'] = item['info']['subfolder'] + '/' + item['info']['filename']
+        mine_type, file_type = determine_file_type(out_put_directory + '/' + item['info']['filename'])
+        if file_type == 'video':
+            width1, height1, size_mb = get_video_dimensions(out_put_directory + '/' + item['info']['filename'])
+        else:
+            width1, height1, size_mb = get_image_dimensions(out_put_directory + '/' + item['info']['filename'])
+        item['width'] = width1
+        item['height'] = height1
+        item['size'] = size_mb
+        item['file_type'] = file_type
+        item['mine_type'] = mine_type
+        base_serialized = base_serialized + size_mb
+    return web.Response(status=200, text=json.dumps({
+        "code": 0,
+        "msg": "文件类型未知",
+        "data": {
+            "data": {
+                "code": 0,
+                "data": {
+                    "base_serialized": round(float(base_serialized), 6),
+                    "worker_list": json_data,
+                    "total": len(json_data)
+                },
+                "message": "ok",
+            }
+        }
+    }))
+@server.PromptServer.instance.routes.post("/manager/save_work")
+async def save_work(request):
+    json_data = await request.json()
+    if 'postData' in json_data and isinstance(json_data['postData'], dict):
+        json_data['postData']['subdomain'] = subdomain
+    timeout = aiohttp.ClientTimeout(total=60)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        json_data['version'] = get_version()
+        techsid = json_data.get('comfyui_tid', '')
+        upload_url = get_base_url() + 'comfyui.apiv2.upload&techsid=we7sid-' + techsid
+        output = json_data['postData']['output']
+        workflow = json_data['postData']['workflow']
+        json_data['postData'].pop('output')
+        json_data['postData'].pop('workflow')
+        json_data['postData']['auth'] = []
+        post_uir_arr = []
+        post_file_arr = []
+        form_data = aiohttp.FormData()
+        try:
+            input_dir = folder_paths.get_input_directory()
+            def get_full_filename(subfolder, filename):
+                return os.path.join(subfolder, filename) if subfolder else filename
+            if 'zhutus' in json_data['postData']:
+                for item in json_data['postData']['zhutus']:
+                    item['filename'] = get_full_filename(item.get('subfolder', ''), item['filename'])
+                    with open(os.path.join(input_dir, item['filename']), 'rb') as f:
+                        file_content = f.read()
+                    form_data.add_field('zhutus[]', file_content, filename=os.path.basename(item['filename']),
+                                        content_type='application/octet-stream')
+            for index, item in enumerate(json_data['postData']['zhutu_data']):
+                if item['url'] == '':
+                    item_url_info = {}
+                    item_url_file = {}
+                    if int(item['upload_type']) == 1:
+                        item['file']['filename'] = get_full_filename(item['file'].get('subfolder', ''), item['file']['filename'])
+                        item_url_info = {
+                            'url': item['mime_type'],
+                            'file_type': item['file_type'],
+                            'width': item['size_info']['width'],
+                            'height': item['size_info']['height'],
+                            'ratio': item['size_info']['height'] / item['size_info']['width'],
+                            'upload_type': 1,
+                            'urls': [],
+                            'type': 'zhutu',
+                            'index': index
+                        }
+                        item_url_file = {
+                            'url': item['file']['filename'],
+                            'upload_type': 1,
+                            'urls': [],
+                            'type': 'zhutu',
+                            'index': index
+                        }
+                        if item['file_url']['right_image'] == '':
+                            item['file_value']['right_image']['filename'] = get_full_filename(item['file_value']['right_image'].get('subfolder', ''), item['file_value']['right_image']['filename'])
+                            right_mime_type = item['base_size']['right']['mime_type']
+                            right_width = item['base_size']['right']['width']
+                            right_height = item['base_size']['right']['height']
+                            right_ratio = right_height / right_width
+                            item_url_info['urls'].append({
+                                'url': right_mime_type,
+                                'width': right_width,
+                                'height': right_height,
+                                'ratio': right_ratio,
+                                'type': 'right'
+                            })
+                            item_url_file['urls'].append({
+                                'url': item['file_value']['right_image']['filename'],
+                                'type': 'right'
+                            })
+                    if item['file_url']['left_image'] == '':
+                        item['file_value']['left_image']['filename'] = get_full_filename(item['file_value']['left_image'].get('subfolder', ''), item['file_value']['left_image']['filename'])
+                        left_mime_type = item['base_size']['left']['mime_type']
+                        file_type = item['base_size']['left']['file_type']
+                        left_width = item['base_size']['left']['width']
+                        left_height = item['base_size']['left']['height']
+                        left_ratio = left_height / left_width
+                        if 'upload_type' in item_url_info:
+                            item_url_info['urls'].append({
+                                'url': left_mime_type,
+                                'width': left_width,
+                                'height': left_height,
+                                'ratio': left_ratio,
+                                'type': 'left'
+                            })
+                            item_url_file['urls'].append({
+                                'url': item['file_value']['left_image']['filename'],
+                                'type': 'left'
+                            })
+                        else:
+                            item_url_info = {
+                                'url': left_mime_type,
+                                'file_type': file_type,
+                                'width': left_width,
+                                'height': left_height,
+                                'ratio': left_ratio,
+                                'upload_type': item['upload_type'],
+                                'urls': [],
+                                'type': 'zhutu',
+                                'index': index
+                            }
+                            item_url_file = {
+                                'url': item['file_value']['left_image']['filename'],
+                                'upload_type': item['upload_type'],
+                                'urls': [],
+                                'type': 'zhutu',
+                                'index': index
+                            }
+                    if 'upload_type' in item_url_info and item_url_info['file_type'] == 'video':
+                        frame_contents = extract_frames(os.path.join(input_dir, item_url_file['url']))
+                        for frame_content in frame_contents:
+                            item_url_info['urls'].append({
+                                'url': 'image/png',
+                                'width': item_url_info['width'],
+                                'height': item_url_info['height'],
+                                'ratio': item_url_info['height'] / item_url_info['width'],
+                                'type': 'frame'
+                            })
+                            item_url_file['urls'].append({
+                                'url': frame_content,
+                                'type': 'frame'
+                            })
+                    if 'upload_type' in item_url_info:
+                        if not is_aspect_ratio_within_limit(item_url_info['width'], item_url_info['height']):
+                            return web.Response(status=200, text=json.dumps({
+                                "code": 0,
+                                "msg": "文件类型未知",
+                                "data": {
+                                    "data": {
+                                        "code": 0,
+                                        "data": {
+                                            'index': index,
+                                            'type': 'zhutu_data',
+                                        },
+                                        "message": "文件长边不可超过短边4倍",
+                                    }
+                                }
+                            }))
+                        post_uir_arr.append(item_url_info)
+                        post_file_arr.append(item_url_file)
+            if 'check_output_item' in json_data['postData']:
+                for index, item in enumerate(json_data['postData']['check_output_item']):
+                    if (item['input_type'] in ['image', 'video']) and item['file_defult_value'] == 1 and item['default_value'] == '':
+                        item['file_value']['filename'] = get_full_filename(item['file_value'].get('subfolder', ''), item['file_value']['filename'])
+                        mine_type, file_type = determine_file_type(os.path.join(input_dir, item['file_value']['filename']))
+                        if file_type == 'unknown':
+                            return web.Response(status=200, text=json.dumps({
+                                "code": 0,
+                                "msg": "文件类型未知",
+                                "data": {
+                                    "data": {
+                                        "code": 0,
+                                        "message": "文件类型未知",
+                                    }
+                                }
+                            }))
+                        if file_type == 'video':
+                            width1, height1, size_mb = get_video_dimensions(os.path.join(input_dir, item['file_value']['filename']))
+                        else:
+                            width1, height1, size_mb = get_image_dimensions(os.path.join(input_dir, item['file_value']['filename']))
+                        if not is_aspect_ratio_within_limit(width1, height1):
+                            return web.Response(status=200, text=json.dumps({
+                                "code": 0,
+                                "msg": "文件类型未知",
+                                "data": {
+                                    "data": {
+                                        "code": 0,
+                                        "data": {
+                                            'index': index,
+                                            'type': 'default_value',
+                                        },
+                                        "message": "文件长边不可超过短边4倍",
+                                    }
+                                }
+                            }))
+                        item_url_info = {
+                            'url': mine_type,
+                            'file_type': file_type,
+                            'width': width1,
+                            'height': height1,
+                            'urls': [],
+                            'ratio': height1 / width1,
+                            'type': 'output',
+                            'index': index
+                        }
+                        item_url_file = {
+                            'url': item['file_value']['filename'],
+                            'file_type': file_type,
+                            'type': 'output',
+                            'urls': [],
+                            'index': index
+                        }
+                        if file_type == 'video':
+                            frame_contents = extract_frames(os.path.join(input_dir, item['file_value']['filename']))
+                            for frame_content in frame_contents:
+                                item_url_info['urls'].append({
+                                    'url': 'image/png',
+                                    'width': width1,
+                                    'height': height1,
+                                    'ratio': height1 / width1,
+                                    'type': 'frame'
+                                })
+                                item_url_file['urls'].append({
+                                    'url': frame_content,
+                                    'type': 'frame'
+                                })
+                        post_uir_arr.append(item_url_info)
+                        post_file_arr.append(item_url_file)
+        except Exception as e:
+            print_exception_in_chinese(e)
+            return web.Response(status=200, text=str(e))
+        image_info_list = []
+        if len(post_uir_arr) > 0:
+            for index, item in enumerate(post_uir_arr):
+                if 'file_type' in item and item['file_type'] == 'video':
+                    for key, val in enumerate(item['urls']):
+                        if val['type'] == 'frame':
+                            image_info_list.append({
+                                'type': 'binary',
+                                'content': post_file_arr[index]['urls'][key]['url']
+                            })
+                else:
+                    image_info_list.append({
+                        'type': 'path',
+                        'content': folder_paths.get_input_directory() + '/' + post_file_arr[index]['url']
+                    })
+            binary_data_list = combine_images(image_info_list)
+            for binary_data in binary_data_list:
+                post_uir_arr.append({
+                    'url': 'image/png',
+                    'file_type': 'image',
+                    'width': '',
+                    'height': '',
+                    'ratio': 1,
+                    'upload_type': 0,
+                    'urls': [],
+                    'type': 'auth',
+                    'index': 0
+                })
+                post_file_arr.append({
+                    'url': binary_data,
+                    'upload_type': 0,
+                    'urls': [],
+                    'type': 'auth',
+                    'index': 0
+                })
+            url_result = await get_upload_url(post_uir_arr, techsid, session)
+            if url_result['errno'] == 41009:
+                return web.Response(status=200, text=json.dumps(url_result))
+            manager = UploadManager(session, url_result, post_file_arr, post_uir_arr, folder_paths.get_input_directory())
+            manager.start_sync()
+            json_arr, auth_arr, url_result_data = manager.get()
+            zhutu_data = json_data['postData']['zhutu_data']
+            acs_list = url_result_data
+            for index, item in enumerate(acs_list):
+                if item['type'] == 'zhutu':
+                    zhutu_data[item['index']]['url_frame'] = []
+                    zhutu_data[item['index']]['url_ratio'] = item['ratio']
+                    zhutu_data[item['index']]['url_type'] = item['file_type']
+                    zhutu_data[item['index']]['url_fm'] = ''
+                    if item['upload_type'] == 2:
+                        zhutu_data[item['index']]['file_url']['left_image'] = item['url']
+                        zhutu_data[item['index']]['url'] = item['url']
+                    else:
+                        zhutu_data[item['index']]['url'] = item['url']
+                    for key, value in enumerate(item['urls']):
+                        if value['type'] == 'frame':
+                            zhutu_data[item['index']]['url_frame'].append(value['url'])
+                            if zhutu_data[item['index']]['url_fm'] == '':
+                                zhutu_data[item['index']]['url_fm'] = value['url']
+                        if value['type'] == 'left':
+                            zhutu_data[item['index']]['file_url']['left_image'] = value['url']
+                        if value['type'] == 'right':
+                            zhutu_data[item['index']]['file_url']['right_image'] = value['url']
+                if item['type'] == 'output':
+                    json_data['postData']['check_output_item'][item['index']]['file_type'] = item['file_type']
+                    json_data['postData']['check_output_item'][item['index']]['default_value'] = item['url']
+                    json_data['postData']['check_output_item'][item['index']]['default_value_fm'] = ''
+                    json_data['postData']['check_output_item'][item['index']]['default_value_ratio'] = item['ratio']
+                    json_data['postData']['check_output_item'][item['index']]['default_value_frame'] = []
+                    for key, value in enumerate(item['urls']):
+                        if value['type'] == 'frame':
+                            json_data['postData']['check_output_item'][item['index']]['default_value_frame'].append(value['url'])
+                            if json_data['postData']['check_output_item'][item['index']]['default_value_fm'] == '':
+                                json_data['postData']['check_output_item'][item['index']]['default_value_fm'] = value['url']
+                    if json_data['postData']['check_output_item'][item['index']]['default_value_fm'] == '':
+                        json_data['postData']['check_output_item'][item['index']]['default_value_fm'] = item['url']
+                if item['type'] == 'auth':
+                    json_data['postData']['auth'].append(item['url'])
+            json_data['postData']['zhutu_data'] = zhutu_data
+        form_data.add_field('json_data', json.dumps(json_data))
+        async with session.post(upload_url, data=form_data) as response:
+            try:
+                response_result = await response.text()
+                result = json.loads(response_result)
+                if 'data' in result and isinstance(result['data'], dict):
+                    if 'data' in result['data'] and isinstance(result['data']['data'], dict):
+                        result_data = result['data']['data']
+                        if techsid != '' and techsid != 'init' and result_data['code'] == 1:
+                            await update_worker_flow(result_data['name'], output)
+                            await update_worker_flow(result_data['name'], workflow, 'workflow/')
+                    return web.Response(status=response.status, text=response_result)
+                else:
+                    return web.Response(status=response.status, text=await response.text())
+            except json.JSONDecodeError as e:
+                return web.Response(status=response.status, text=await response.text())
+@server.PromptServer.instance.routes.post("/manager/do_upload")
+async def do_upload(request):
+    json_data = await request.json()
+    header_image = json_data['header_image']
+    techsid = json_data.get('comfyui_tid', '')
+    upload_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=sj&c=entry&a=wxapp&do=ttapp&r=upload&techsid=we7sid-' + techsid + '&m=tech_huise&sign=ceccdd172de0cc2b8d20fc0c08e53707'
+    async with aiohttp.ClientSession() as session:
+        try:
+            form_data = aiohttp.FormData()
+            if header_image['subfolder'] != '':
+                header_image['filename'] = header_image['subfolder'] + '/' + header_image['filename']
+            with open(folder_paths.get_input_directory() + '/' + header_image['filename'], 'rb') as f:
+                file_content = f.read()
+            form_data.add_field('file', file_content, filename=os.path.basename(header_image['filename']),
+                                content_type='application/octet-stream')
+        except Exception as e:
+            return web.Response(status=200, text=str(e))
+        async with session.post(upload_url, data=form_data) as response:
+            try:
+                response_result = await response.text()
+                result = json.loads(response_result)
+                if 'data' in result and isinstance(result['data'], dict):
+                    return web.Response(status=response.status, text=response_result)
+                else:
+                    return web.Response(status=response.status, text=await response.text())
+            except json.JSONDecodeError as e:
+                return web.Response(status=response.status, text=await response.text())
+    pass
+@server.PromptServer.instance.routes.post("/manager/do_service")
+async def do_service(request):
+    return await handle_request(await request.json())
+@server.PromptServer.instance.routes.post("/manager/upload_file_to_zhutu")
+async def do_service_upload(request):
+    json_data = await request.json()
+    left_image = json_data.get('left_image', '')
+    right_image = json_data.get('right_image', '')
+    if left_image == '' and right_image == '':
+        result = {
+            "code": 0,
+            "msg": "请上传图片",
+            "data": {}
+        }
+        return web.Response(status=200, text=json.dumps(result))
+    base_image = find_project_bxb() + 'assets/image/bg-image.png'
+    base_image1 = find_project_bxb() + 'assets/image/bg-image1.png'
+    base_image2 = find_project_bxb() + 'assets/image/bg-image2.png'
+    base_image3 = find_project_bxb() + 'assets/image/bg-image3.png'
+    overlay_img = ''
+    if left_image != '':
+        left_image = folder_paths.get_input_directory() + '/' + left_image
+        overlay_img = base_image1
+    if right_image != '':
+        right_image = folder_paths.get_input_directory() + '/' + right_image
+        overlay_img = base_image2
+    if left_image != '' and right_image != '':
+        overlay_img = base_image3
+    zhutu_info = do_zhutu(left_image, right_image, overlay_img)
+    if zhutu_info['code'] == 0:
+        result = {
+            "code": 0,
+            "msg": "成功",
+            "data": zhutu_info['data'],
+            "filename": zhutu_info['filename'],
+            'type': zhutu_info['type'],
+            'mime_type': 'image/png' if zhutu_info['type'] == 'image' else 'video/mp4',
+            'size': zhutu_info['size'],
+            'base_size': zhutu_info['base_size']
+        }
+    else:
+        result = {
+            "code": 1,
+            "msg": zhutu_info['error'],
+            "data": {}
+        }
+    return web.Response(status=200, text=json.dumps(result))
+async def handle_request(json_data):
+    path_param = json_data.get('r', '')
+    json_data.pop('r')
+    async with aiohttp.ClientSession() as session:
+        techsid = json_data.get('comfyui_tid', '')
+        upload_url = f"{get_base_url()}{path_param}&techsid=we7sid-{techsid}"
+        try:
+            form_data = aiohttp.FormData()
+            for key, value in json_data.items():
+                form_data.add_field(key, value)
+        except Exception as e:
+            return web.Response(status=200, text=str(e))
+        try:
+            async with session.post(upload_url, data=form_data) as response:
+                response_result = await response.text()
+                try:
+                    result = json.loads(response_result)
+                except json.JSONDecodeError:
+                    return web.Response(status=response.status, text=response_result)
+                if 'data' in result and isinstance(result['data'], dict):
+                    if path_param == 'shangjia.sjindex.delete':
+                        delete_workflow(json_data.get('uniqueid', '') + '.json')
+                    pass
+                    return web.Response(status=response.status, text=json.dumps(result['data']))
+                else:
+                    return web.Response(status=response.status, text=json.dumps(result))
+        except Exception as e:
+            return web.Response(status=response.status, text=str(e))
+@server.PromptServer.instance.routes.post("/manager/upload_file")
+async def upload_file(request):
+    reader = await request.multipart()
+    field = await reader.next()
+    if field.name != 'file':
+        return web.json_response({'error': 'No file part'}, status=400)
+    filename = field.filename
+    if not filename:
+        return web.json_response({'error': 'No selected file'}, status=400)
+    file_path = os.path.join(folder_paths.get_input_directory(), filename)
+    with open(file_path, 'wb') as f:
+        while True:
+            chunk = await field.read_chunk()
+            if not chunk:
+                break
+            f.write(chunk)
+    file_url = file_path.replace(folder_paths.get_input_directory(), '')
+    return web.json_response({'message': 'File uploaded successfully', 'file_path': file_url})
+app = web.Application()
+app.router.add_post("/manager/upload_file", upload_file)
+cors = aiohttp_cors.setup(app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+    )
+})
+for route in list(app.router.routes()):
+    cors.add(route)
 @server.PromptServer.instance.routes.post("/manager/do_wss")
 async def do_wss(request):
+    pass
+@server.PromptServer.instance.routes.post("/manager/get_workers")
+async def get_workers(request):
+    file_names = get_filenames(find_project_custiom_nodes_path() + 'ComfyUI_Bxb/config/json/workflow/')
+    return web.json_response({'message': '获取所有作品', 'worker_names': file_names})
+    pass
+@server.PromptServer.instance.routes.post("/manager/get_workers_detail")
+async def get_workers_detail(request):
+    json_data = await request.json()
+    workflow = get_workflow(json_data.get('uniqueid', '') + '.json')
+    return web.json_response({'message': '获取指定作品', 'workflow': workflow})
     pass
 class sdBxb:
     def __init__(self):
@@ -407,8 +1045,6 @@ class sdBxb_textInput:
     @staticmethod
     def main(text):
         return (text,)
-
-
 def replace_time_format_in_filename(filename_prefix):
     def compute_vars(input):
         now = datetime.now()
@@ -430,7 +1066,6 @@ def replace_time_format_in_filename(filename_prefix):
             input = input.replace(f"%date:{original_format}%", formatted_date)
         return input
     return compute_vars(filename_prefix)
-
 class sdBxb_saveImage:
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
@@ -447,7 +1082,7 @@ class sdBxb_saveImage:
     FUNCTION = "save_images"
     OUTPUT_NODE = True
     CATEGORY = "sdBxb"
-    def save_images(self, images, filename_prefix="sdBxb"):
+    def save_images(self, images, filename_prefix="ComfyUI"):
         filename_prefix = self.prefix_append + filename_prefix
         filename_prefix = replace_time_format_in_filename(filename_prefix)
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
