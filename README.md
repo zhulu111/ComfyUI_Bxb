@@ -56,4 +56,13 @@ YouTube：https://youtu.be/5lJn-NHtc9w
 3、官方QQ群：967073981，下载插件包，放到ComfyUI/custom_nodes目录下，重启ComfyUI即可安装本插件；  
 ## 使用示例和截屏说明
 ### ComfyUI插件端截屏
-![Intro Image](assets/sdbxb.jpg) 
+![Intro Image](assets/01.png) 
+![Intro Image](assets/02.png) 
+![Intro Image](assets/03.png) 
+![Intro Image](assets/04.png) 
+![Intro Image](assets/05.jpg) 
+![Intro Image](assets/06.jpg) 
+![Intro Image](assets/07.png) 
+![Intro Image](assets/08.png) 
+![Intro Image](assets/09.png) 
+![Intro Image](assets/10.png) 
