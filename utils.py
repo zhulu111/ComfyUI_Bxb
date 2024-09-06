@@ -5,16 +5,16 @@ import urllib.request
 import subprocess
 import os
 import platform
-import urllib.request
 import tarfile
 import zipfile
 from functools import lru_cache
 import shutil
-from tempfile import NamedTemporaryFile
 from PIL import Image, PngImagePlugin
 import json
 from tqdm import tqdm
 import io
+from pathlib import Path
+import ssl
 import mimetypes
 import imghdr
 from .public import args, find_project_root, generate_md5_uid_timestamp, determine_file_type, find_project_custiom_nodes_path
@@ -33,6 +33,7 @@ FFMPEG_URLS = {
     "osx64": "https://tt-1254127940.cos.ap-guangzhou.myqcloud.com/ffmpeg/ffmpeg-116599-g43cde54fc1.zip",
     "win64-full": "https://tt-1254127940.cos.ap-guangzhou.myqcloud.com/ffmpeg/ffmpeg-release-essentials.zip"
 }
+ssl._create_default_https_context = ssl._create_unverified_context
 ffmpeg_path_exe = ''
 ffprobe_exe_path = ''
 temp_path = find_project_custiom_nodes_path() + 'ComfyUI_Bxb/temp_bxb/'
@@ -149,6 +150,9 @@ def download_ffmpeg(target_dir):
 @lru_cache()
 def find_ffmpeg_executable(search_dir):
     
+    if not os.path.exists(search_dir):
+        return None
+    os.chmod(search_dir, 0o755)
     for root, dirs, files in os.walk(search_dir):
         for file in files:
             if file.lower() == "ffmpeg.exe" or file.lower() == "ffmpeg":
@@ -171,6 +175,7 @@ def get_ffmpeg_executable():
         ffmpeg_path_exe = str(ffmpeg_exe)
         ffprobe_exe = find_ffprobe_executable(target_dir + "/ffmpeg")
         ffprobe_exe_path = str(ffprobe_exe)
+        os.chmod(ffprobe_exe_path, 0o755)
         return str(ffmpeg_exe)
     remove_target_dir = target_dir + "/ffmpeg"
     if os.path.exists(remove_target_dir):
@@ -180,11 +185,13 @@ def get_ffmpeg_executable():
         ffmpeg_path_exe = exe
         ffprobe_exe = find_ffprobe_executable(target_dir + "/ffmpeg")
         ffprobe_exe_path = str(ffprobe_exe)
+        os.chmod(ffprobe_exe_path, 0o755)
         return exe
     raise RuntimeError("FFmpeg not found or is invalid.")
 def is_valid_exe(exe):
     
     try:
+        os.chmod(exe, 0o755)
         result = subprocess.run([exe, '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.returncode == 0
     except Exception:
@@ -276,7 +283,6 @@ def merge_videos_horizontally(input_file1, input_file2, output_file='temp_frames
         output_file
     ]
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-from pathlib import Path
 def get_file_count_in_directory():
     directory = Path(temp_path)
     if not directory.exists():
