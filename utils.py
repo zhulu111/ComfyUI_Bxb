@@ -199,19 +199,19 @@ def is_valid_exe(exe):
 def get_image_dimensions(input_file, custom_data=None):
     with Image.open(input_file) as img:
         width, height = img.size
-        if custom_data:
-            if img.format == 'PNG':
-                meta = PngImagePlugin.PngInfo()
-                for key, value in custom_data.items():
-                    if isinstance(value, bytes):
-                        value = base64.b64encode(value).decode('utf-8')
-                    meta.add_text(key, value)
-                img.save(input_file, "PNG", pnginfo=meta)
-            elif img.format == 'JPEG':
-                exif_dict = {}
-                for key, value in custom_data.items():
-                    exif_dict[key] = value
-                img.save(input_file, "JPEG", exif=exif_dict)
+        # if custom_data:
+        #     if img.format == 'PNG':
+        #         meta = PngImagePlugin.PngInfo()
+        #         for key, value in custom_data.items():
+        #             if isinstance(value, bytes):
+        #                 value = base64.b64encode(value).decode('utf-8')
+        #             meta.add_text(key, value)
+        #         img.save(input_file, "PNG", pnginfo=meta)
+        #     elif img.format == 'JPEG':
+        #         exif_dict = {}
+        #         for key, value in custom_data.items():
+        #             exif_dict[key] = value
+        #         img.save(input_file, "JPEG", exif=exif_dict)
     file_size_bytes = os.path.getsize(input_file)
     file_size_mb = file_size_bytes / (1024 * 1024)
     return width, height, file_size_mb
