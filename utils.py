@@ -421,6 +421,7 @@ def process_and_merge_image_video(image_file, video_file, output_file, overlay_i
 def process_and_merge_videos(input_file1, input_file2, start_seconds1, end_seconds1, start_seconds2, end_seconds2,
                              output_file, overlay_image, fps=24):
     global CANVAS_MAX_HEIGHT, CANVAS_MAX_WIDTH
+    video_width1, video_height1, video_size = get_video_dimensions(input_file2)
     get_file_count_in_directory()
     cut1 = temp_path + generate_md5_uid_timestamp('cut1.mp4') + 'cut1.mp4'
     cut2 = temp_path + generate_md5_uid_timestamp('cut1.mp4') + 'cut2.mp4'
@@ -428,6 +429,8 @@ def process_and_merge_videos(input_file1, input_file2, start_seconds1, end_secon
     cut2_looped = temp_path + generate_md5_uid_timestamp('cut1.mp4') + 'cut2_looped.mp4'
     max_width = CANVAS_MAX_WIDTH / 2
     max_height = CANVAS_MAX_HEIGHT
+    max_width = video_width1
+    max_height = video_height1
     duration1 = cut_video(input_file1, start_seconds1, end_seconds1, cut1, max_width, max_height, fps)
     duration2 = cut_video(input_file2, start_seconds2, end_seconds2, cut2, max_width, max_height, fps)
     max_duration = max(duration1, duration2)
@@ -441,10 +444,10 @@ def process_and_merge_videos(input_file1, input_file2, start_seconds1, end_secon
         video2_file = cut2_looped
     else:
         video2_file = cut2
-    overlay_new_width = int(CANVAS_MAX_WIDTH / 15)
-    overlay_new_height = int(CANVAS_MAX_WIDTH / 15)
-    overlay_x = (CANVAS_MAX_WIDTH - overlay_new_width) // 2
-    overlay_y = (CANVAS_MAX_HEIGHT - overlay_new_height) // 2
+    overlay_new_width = int(max_width * 2 / 15)
+    overlay_new_height = int(max_width * 2 / 15)
+    overlay_x = (max_width * 2 - overlay_new_width) // 2
+    overlay_y = (max_height - overlay_new_height) // 2
     process_videos_with_overlay(video1_file, video2_file, overlay_image, output_file,
                                 overlay_new_width=overlay_new_width,
                                 overlay_new_height=overlay_new_height,
