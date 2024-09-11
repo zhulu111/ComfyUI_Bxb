@@ -101,7 +101,12 @@ class UploadManager:
         import time
         start_time = time.time()
         upload_url, post_file, is_binary, mime_type, index, is_sub_url, key = args
-        send_binary_data_async(upload_url, post_file, is_binary, mime_type)
+        upload_status, upload_meaage = send_binary_data_async(upload_url, post_file, is_binary, mime_type)
+        if not upload_status:
+            time.sleep(0.5)
+            upload_status, upload_meaage = send_binary_data_async(upload_url, post_file, is_binary, mime_type)
+            if not upload_status:
+                raise Exception(upload_meaage)
         cleaned_url = remove_query_parameters(upload_url)
         elapsed_time = time.time() - start_time
         return cleaned_url, index, is_sub_url, key, elapsed_time, is_binary
@@ -119,6 +124,7 @@ class UploadManager:
                         self.url_result['data']['data'][index]['url'] = cleaned_url
                     results.append((cleaned_url, index, is_sub_url, key))
                 except Exception as e:
+                    raise Exception(str(e)+cleaned_url)
                     pass
         return results
     def get(self):
@@ -290,12 +296,16 @@ async def getHistoryPrompt(prompt_id, type_a=''):
             form_res_data = await send_form_data(session, submit_url, result_data, prompt_id)
         except json.JSONDecodeError as e:
             print_exception_in_chinese(e)
-            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'json异常的信息'})
+            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': str(e)})
+            result_data.append({"type": "str", "k": 'error', "v": str(e)})
             response_status = 400
+            form_res_data = await send_form_data(session, submit_url, result_data, prompt_id)
         except Exception as e:
             print_exception_in_chinese(e)
-            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'aiohttpException异常的信息'})
+            result_data.append({"type": "str", "k": 'ok', "v": '0', 'text': 'upload_url:'+str(e)})
+            result_data.append({"type": "str", "k": 'error', "v": 'upload_url:'+str(e)})
             response_status = 500
+            form_res_data = await send_form_data(session, submit_url, result_data, prompt_id)
         finally:
             if 'session' in locals():
                 await session.close()
@@ -472,12 +482,6 @@ async def server2_receive_messages(websocket, message_type, message_json):
                 'prompt_id': message_json['data']['prompt_id'],
             })
             pass
-        # if message_type == 'execution_success' and 'prompt_id' in message_json['data']:
-        #     task_queue_2.put({
-        #         'type': 'send',
-        #         'prompt_id': message_json['data']['prompt_id'],
-        #     })
-        #     pass
 async def receive_messages(websocket, conn_identifier):
     
     if websocket.open:
@@ -594,10 +598,10 @@ def queue_prompt(prompt, workflow, new_client_id):
         return {}
 def find_element_by_key(array, key):
     key_int = int(key)
-    for element in array:
+    for index, element in enumerate(array):
         if element.get('id') == key_int:
-            return element
-    return None
+            return element, index
+    return None, -1
 async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
     global websocket_conn1
     line_json = read_json_file('https://tt.9syun.com/seed.json')
@@ -677,10 +681,13 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
         }
     async def print_item(now_index, key, value):
         try:
+            workflow_node = workflow['extra_data']['extra_pnginfo']['workflow']['nodes']
+            if value['class_type'] in line_json['switch_name']:
+                workflow_node_info, workflow_node_info_index = find_element_by_key(workflow_node, key)
+                workflow['extra_data']['extra_pnginfo']['workflow']['nodes'][workflow_node_info_index]['widgets_values'][0] = value['inputs']['select']
             if value['class_type'] in line_json['seed'] and line_json['seed'][value['class_type']]:
                 check_value = line_json['seed'][value['class_type']]
-                workflow_node = workflow['extra_data']['extra_pnginfo']['workflow']['nodes']
-                workflow_node_info = find_element_by_key(workflow_node, key)
+                workflow_node_info, workflow_node_info_index = find_element_by_key(workflow_node, key)
                 try:
                     if workflow_node_info:
                         default_seed_value = json_data[key]['inputs'][check_value['seed']]

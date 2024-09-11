@@ -196,24 +196,35 @@ def is_valid_exe(exe):
         return result.returncode == 0
     except Exception:
         return False
+from io import BytesIO
 def get_image_dimensions(input_file, custom_data=None):
     with Image.open(input_file) as img:
         width, height = img.size
-        # if custom_data:
-        #     if img.format == 'PNG':
-        #         meta = PngImagePlugin.PngInfo()
-        #         for key, value in custom_data.items():
-        #             if isinstance(value, bytes):
-        #                 value = base64.b64encode(value).decode('utf-8')
-        #             meta.add_text(key, value)
-        #         img.save(input_file, "PNG", pnginfo=meta)
-        #     elif img.format == 'JPEG':
-        #         exif_dict = {}
-        #         for key, value in custom_data.items():
-        #             exif_dict[key] = value
-        #         img.save(input_file, "JPEG", exif=exif_dict)
-    file_size_bytes = os.path.getsize(input_file)
-    file_size_mb = file_size_bytes / (1024 * 1024)
+        img_format = img.format
+        if not custom_data or (img_format != 'PNG' and img_format != 'JPEG'):
+            file_size_bytes = os.path.getsize(input_file)
+            file_size_mb = file_size_bytes / (1024 * 1024)
+            return width, height, file_size_mb
+        img_byte_arr = BytesIO()
+        if img_format == 'PNG':
+            meta = PngImagePlugin.PngInfo()
+            for key, value in custom_data.items():
+                if isinstance(value, bytes):
+                    value = base64.b64encode(value).decode('utf-8')
+                meta.add_text(key, value)
+            img.save(img_byte_arr, format="PNG", pnginfo=meta)
+        elif img_format == 'JPEG':
+            img = img.convert("RGB")
+            exif_dict = {}
+            for key, value in custom_data.items():
+                exif_dict[key] = value
+            img.save(img_byte_arr, format="JPEG", exif=exif_dict)
+        img_byte_arr.seek(0)
+        image_bytes = img_byte_arr.getvalue()
+        with open(input_file, "wb") as f:
+            f.write(image_bytes)
+        file_size_bytes = len(image_bytes)
+        file_size_mb = file_size_bytes / (1024 * 1024)
     return width, height, file_size_mb
 def get_video_dimensions(input_file):
     command = [

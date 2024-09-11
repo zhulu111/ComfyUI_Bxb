@@ -2,7 +2,7 @@ import hashlib
 import os
 import aiohttp
 import folder_paths
-from PIL import Image, ImageDraw
+from PIL import Image
 import traceback
 import json
 import sys
@@ -15,7 +15,6 @@ import urllib
 import urllib.request
 import urllib.parse
 import filetype
-import subprocess
 args = parser.parse_args()
 if args and args.listen:
     pass
@@ -23,8 +22,7 @@ else:
     args = parser.parse_args([])
 import time
 import random
-import asyncio
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse
 try:
     resample_filter = Image.Resampling.LANCZOS
 except AttributeError:
@@ -545,13 +543,18 @@ def send_binary_data_async(upload_url, file_path, is_binary=False, mime_type='im
     headers = {
         'Content-Type': mime_type,
     }
-    if is_binary:
-        binary_data = file_path
-    else:
-        with open(file_path, 'rb') as file:
-            binary_data = file.read()
-    response = requests.put(upload_url, data=binary_data, headers=headers)
-    if response.status_code == 200:
-        return True
-    else:
-        return False
+    try:
+        if is_binary:
+            binary_data = file_path
+        else:
+            with open(file_path, 'rb') as file:
+                binary_data = file.read()
+        response = requests.put(upload_url, data=binary_data, headers=headers)
+        if response.status_code == 200:
+            return True, ''
+        else:
+            error_message = f"Error uploading file. Status code: {response.status_code}, Reason: {response.reason}, Response text: {response.text}"
+            return False, error_message
+    except Exception as e:
+        error_message = f"An error occurred while uploading the file: {str(e)}"
+        return False, error_message

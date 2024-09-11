@@ -14,11 +14,13 @@ import server
 import folder_paths
 from aiohttp import web
 from collections import deque
+import inspect
 import os
 import uuid
 import hashlib
 import platform
 import stat
+import nodes
 import urllib.request
 import numpy as np
 import shutil
@@ -37,6 +39,7 @@ input_directory = folder_paths.get_input_directory()
 os.makedirs(input_directory, exist_ok=True)
 save_input_directory = input_directory + '/temp'
 os.makedirs(save_input_directory, exist_ok=True)
+load_class = 'bxbSwitch'
 def get_time():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 def get_mac_address():
@@ -80,7 +83,6 @@ class SDClient:
         self.monitoring_thread = None
         self.stop_monitoring = False
     def create_sdc_ini(self, file_path, subdomain):
-        # 生成 sdc.toml 文件
         config_content = f"""
 [common]
 server_addr = "{self.server_addr}"
@@ -1066,6 +1068,122 @@ def replace_time_format_in_filename(filename_prefix):
             input = input.replace(f"%date:{original_format}%", formatted_date)
         return input
     return compute_vars(filename_prefix)
+def is_execution_model_version_supported():
+    try:
+        import comfy_execution
+        return True
+    except:
+        return False
+class AnyType(str):
+    def __ne__(self, __value: object) -> bool:
+        return False
+any_typ = AnyType("*")
+class AlwaysEqual(str):
+    def __eq__(self, other):
+        return True
+def onprompt(json_data):
+    if is_execution_model_version_supported():
+        pass
+    else:
+        nodes_a = json_data['extra_data']['extra_pnginfo']['workflow']['nodes']
+        delete_arr = []
+        for index, item in enumerate(nodes_a):
+            if item['type'] == load_class:
+                first_value = item['widgets_values'][0]
+                index = next(
+                    (i for i, value in enumerate(item['widgets_values'][1:], start=1)
+                     if value == first_value),
+                    None
+                )
+                if index is not None:
+                    delete_arr.append({
+                        'id': item['id'],
+                        'index': index,
+                        'first_value': first_value
+                    })
+        for kk, vv in enumerate(delete_arr):
+            if str(vv['id']) in json_data['prompt']:
+                keys_to_delete = []
+                for key, value in json_data['prompt'][str(vv['id'])]['inputs'].items():
+                    if not key.startswith(f"input{vv['index']}") and key != 'select':
+                        keys_to_delete.append(key)
+                for key in keys_to_delete:
+                    del json_data['prompt'][str(vv['id'])]['inputs'][key]
+    return json_data
+server.PromptServer.instance.add_on_prompt_handler(onprompt)
+always_equal = AlwaysEqual("any_value")
+class bxbSwitch:
+    @classmethod
+    def INPUT_TYPES(s):
+        dyn_inputs = {
+        }
+        select_value = []
+        new_required = {
+            "select": ([always_equal for i in range(1, 200)],),
+        }
+        if is_execution_model_version_supported():
+            stack = inspect.stack()
+            if stack[2].function == 'get_input_info' and stack[3].function == 'add_node':
+                for x in range(0, 200):
+                    dyn_inputs[f"input{x}"] = (any_typ, {"lazy": True})
+        inputs = {
+            "required": new_required,
+            "optional": dyn_inputs,
+            "hidden": {"unique_id": "UNIQUE_ID", "extra_pnginfo": "EXTRA_PNGINFO", 'nodes': [],
+                       "select_index": ("INT", {"default": 1, "min": 1, "max": 999999, "step": 1,
+                                                "tooltip": "The input number you want to output among the inputs"}),
+                       }
+        }
+        return inputs
+    RETURN_TYPES = (any_typ, "STRING", "INT")
+    RETURN_NAMES = ("selected_value", "selected_label", "selected_index")
+    FUNCTION = "do"
+    CATEGORY = "sdBxb"
+    def check_lazy_status(self, *args, **kwargs):
+        unique_id = kwargs['unique_id']
+        nodes_a = kwargs['extra_pnginfo']['workflow']['nodes']
+        if isinstance(unique_id, str):
+            try:
+                unique_id = int(unique_id)
+            except ValueError:
+                print(f"无法将 unique_id '{unique_id}' 转换为整数")
+        matching_node = next((node for node in nodes_a if int(node['id']) == unique_id), None)
+        if matching_node is None:
+            print(f"无效节点 ID: {unique_id}")
+            return []
+        first_value = matching_node['widgets_values'][0]
+        index = next(
+            (i for i, value in enumerate(matching_node['widgets_values'][1:], start=1)
+             if value == first_value),
+            None
+        )
+        if index is None:
+            return []
+        input_name = 'input' + str(index)
+        return [input_name]
+    @staticmethod
+    def do(*args, **kwargs):
+        unique_id = kwargs['unique_id']
+        nodes_a = kwargs['extra_pnginfo']['workflow']['nodes']
+        if isinstance(unique_id, str):
+            try:
+                unique_id = int(unique_id)
+            except ValueError:
+                return None, "", -1
+        matching_node = next((node for node in nodes_a if int(node['id']) == unique_id), None)
+        if matching_node is None:
+            print(f" ID: {unique_id}")
+            return None, "", -1
+        first_value = matching_node['widgets_values'][0]
+        index = next(
+            (i for i, value in enumerate(matching_node['widgets_values'][1:], start=1)
+             if value == first_value),
+            None
+        )
+        if index is None:
+            print(f" ID: {unique_id}")
+            return None, "", -1
+        return kwargs['input' + str(index)], first_value, index
 class sdBxb_saveImage:
     def __init__(self):
         self.output_dir = folder_paths.get_output_directory()
@@ -1113,9 +1231,11 @@ NODE_CLASS_MAPPINGS = {
     "sdBxb": sdBxb,
     "sdBxb_textInput": sdBxb_textInput,
     "sdBxb_saveImage": sdBxb_saveImage,
+    "bxbSwitch": bxbSwitch,
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "sdBxb": "sdBxb",
     "sdBxb_textInput": "textInput",
     "sdBxb_saveImage": "saveImage",
+    "bxbSwitch": "bxbSwitch",
 }
