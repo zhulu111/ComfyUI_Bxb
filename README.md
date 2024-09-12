@@ -2,6 +2,8 @@
 ## 插件功能
 SD变现宝插件可以一键把comfyui工作流转为“微信小程序”、“抖音小程序”、“微信内H5”、“微信外H5”，且都支持支付变现。  
 在您现有工作流的基础上，加入ComfyUI_Bxb插件， 即可实现一键转换。
+## 新版使用说明   
+https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copylink
 ## 特别说明
 ### 如在使用过程中出现问题，或者您有意见或者建议都请联系我。  
 ![Intro Image](assets/lxwm.jpg) 
