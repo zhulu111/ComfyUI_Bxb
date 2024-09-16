@@ -101,12 +101,24 @@ class UploadManager:
         import time
         start_time = time.time()
         upload_url, post_file, is_binary, mime_type, index, is_sub_url, key = args
+        http_proxy = os.environ.get('http_proxy', '')
+        https_proxy = os.environ.get('https_proxy', '')
+        no_proxy = os.environ.get('no_proxy', '*')
+        os.environ['http_proxy'] = ''
+        os.environ['https_proxy'] = ''
+        os.environ['no_proxy'] = '*'
         upload_status, upload_meaage = send_binary_data_async(upload_url, post_file, is_binary, mime_type)
         if not upload_status:
             time.sleep(0.5)
             upload_status, upload_meaage = send_binary_data_async(upload_url, post_file, is_binary, mime_type)
             if not upload_status:
+                os.environ['http_proxy'] = http_proxy
+                os.environ['https_proxy'] = https_proxy
+                os.environ['no_proxy'] = no_proxy
                 raise Exception(upload_meaage)
+        os.environ['http_proxy'] = http_proxy
+        os.environ['https_proxy'] = https_proxy
+        os.environ['no_proxy'] = no_proxy
         cleaned_url = remove_query_parameters(upload_url)
         elapsed_time = time.time() - start_time
         return cleaned_url, index, is_sub_url, key, elapsed_time, is_binary

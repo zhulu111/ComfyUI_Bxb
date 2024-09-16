@@ -406,13 +406,8 @@ def process_zhutu(image_info, base_image1, base_image2, base_image3):
             'size': zhutu_info['size'],
             'base_size': zhutu_info['base_size']
         }
-    else:
-        image_info['result'] = {
-            "code": 1,
-            "msg": zhutu_info['error'],
-            "data": {}
-        }
-    return image_info
+        return image_info
+    return  None
 async def process_images_multithread(updated_images, base_image1, base_image2, base_image3):
     
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -429,7 +424,8 @@ async def process_images_multithread(updated_images, base_image1, base_image2, b
             for image_info in updated_images
         ]
         results = await asyncio.gather(*tasks)
-        return results
+        updated_images = [result for result in results if result is not None]
+        return updated_images
 @server.PromptServer.instance.routes.post("/manager/download_fileloads")
 async def download_fileloads(request):
     yu_load_images = await request.json()
@@ -727,9 +723,24 @@ async def save_work(request):
             url_result = await get_upload_url(post_uir_arr, techsid, session)
             if url_result['errno'] == 41009:
                 return web.Response(status=200, text=json.dumps(url_result))
-            manager = UploadManager(session, url_result, post_file_arr, post_uir_arr, folder_paths.get_input_directory())
-            manager.start_sync()
-            json_arr, auth_arr, url_result_data = manager.get()
+            try:
+                manager = UploadManager(session, url_result, post_file_arr, post_uir_arr, folder_paths.get_input_directory())
+                manager.start_sync()
+                json_arr, auth_arr, url_result_data = manager.get()
+            except Exception as e:
+                print_exception_in_chinese(e)
+                return web.Response(status=200, text=json.dumps({
+                    "code": 0,
+                    "msg": "上传失败",
+                    "data": {
+                        "data": {
+                            "code": 0,
+                            "data": {
+                            },
+                            "message": "资源上传失败了,请重新上传,确保网络状态,如果使用了代理建议关闭代理上传",
+                        }
+                    }
+                }))
             zhutu_data = json_data['postData']['zhutu_data']
             acs_list = url_result_data
             for index, item in enumerate(acs_list):

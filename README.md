@@ -9,6 +9,10 @@ https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copyli
 ![Intro Image](assets/lxwm.jpg) 
 ## 更新记录 
 ### 已更新
+2024.9.16：  
+1、新增激励视频广告功能（目前已支持：微信小程序和抖音小程序）；   
+2、修复若干不同环境的兼容问题；   
+
 2024.9.11：  
 1、新增链路选择节点(bxbSwitch)；  
 2、新增主页背景和制作页背景自定义功能；   
