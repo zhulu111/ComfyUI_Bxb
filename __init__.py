@@ -227,7 +227,8 @@ async def tech_zhulu(request):
     json_data = await request.json()
     if 'postData' in json_data and isinstance(json_data['postData'], dict):
         json_data['postData']['subdomain'] = subdomain
-    async with aiohttp.ClientSession() as session:
+    connector = aiohttp.TCPConnector()
+    async with aiohttp.ClientSession(connector=connector) as session:
         json_data['version'] = get_version()
         techsid = json_data.get('comfyui_tid', '')
         upload_url = get_base_url() + json_data['r'] + '&techsid=we7sid-' + techsid
@@ -347,12 +348,6 @@ async def download_fileloadd(request):
 async def process_download_tasks(yu_load_images):
     
     loop = asyncio.get_event_loop()
-    http_proxy = os.environ.get('http_proxy', '')
-    https_proxy = os.environ.get('https_proxy', '')
-    no_proxy = os.environ.get('no_proxy', '*')
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = '*'
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         download_tasks = []
         for image_info in yu_load_images:
@@ -380,9 +375,6 @@ async def process_download_tasks(yu_load_images):
                 }
             else:
                 image_info['right_image'] = ''
-    os.environ['http_proxy'] = http_proxy
-    os.environ['https_proxy'] = https_proxy
-    os.environ['no_proxy'] = no_proxy
     return yu_load_images
 def process_zhutu(image_info, base_image1, base_image2, base_image3):
     
@@ -489,7 +481,8 @@ async def save_work(request):
     if 'postData' in json_data and isinstance(json_data['postData'], dict):
         json_data['postData']['subdomain'] = subdomain
     timeout = aiohttp.ClientTimeout(total=60)
-    async with aiohttp.ClientSession(timeout=timeout) as session:
+    connector = aiohttp.TCPConnector(use_dns_cache=False)
+    async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
         json_data['version'] = get_version()
         techsid = json_data.get('comfyui_tid', '')
         upload_url = get_base_url() + 'comfyui.apiv2.upload&techsid=we7sid-' + techsid
@@ -804,13 +797,27 @@ async def save_work(request):
                     return web.Response(status=response.status, text=await response.text())
             except json.JSONDecodeError as e:
                 return web.Response(status=response.status, text=await response.text())
+@server.PromptServer.instance.routes.get("/manager/not_widgets")
+async def not_widgets(request):
+    remote_url = 'https://tt.9syun.com/not_widgets.js?time=' + str(int(time.time()))
+    proxy_handler = urllib.request.ProxyHandler({})
+    opener = urllib.request.build_opener(proxy_handler)
+    urllib.request.install_opener(opener)
+    try:
+        with opener.open(remote_url) as response:
+            script_content = response.read().decode('utf-8')
+        return web.Response(status=200, text=script_content, content_type='application/javascript')
+    except Exception as e:
+        print('加载资源出错，检查网络或关闭代理')
+        return web.Response(status=500, text=str(e))
 @server.PromptServer.instance.routes.post("/manager/do_upload")
 async def do_upload(request):
     json_data = await request.json()
     header_image = json_data['header_image']
     techsid = json_data.get('comfyui_tid', '')
     upload_url = 'https://tt.9syun.com/app/index.php?i=66&t=0&v=1.0&from=wxapp&tech_client=sj&c=entry&a=wxapp&do=ttapp&r=upload&techsid=we7sid-' + techsid + '&m=tech_huise&sign=ceccdd172de0cc2b8d20fc0c08e53707'
-    async with aiohttp.ClientSession() as session:
+    connector = aiohttp.TCPConnector()
+    async with aiohttp.ClientSession(connector=connector) as session:
         try:
             form_data = aiohttp.FormData()
             if header_image['subfolder'] != '':
@@ -882,7 +889,8 @@ async def do_service_upload(request):
 async def handle_request(json_data):
     path_param = json_data.get('r', '')
     json_data.pop('r')
-    async with aiohttp.ClientSession() as session:
+    connector = aiohttp.TCPConnector()
+    async with aiohttp.ClientSession(connector=connector) as session:
         techsid = json_data.get('comfyui_tid', '')
         upload_url = f"{get_base_url()}{path_param}&techsid=we7sid-{techsid}"
         try:

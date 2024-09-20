@@ -180,7 +180,10 @@ def get_filenames(directory):
         return []
 def read_json_file(url):
     try:
-        response = requests.get(url)
+        session = requests.Session()
+        session.trust_env = False
+        session.proxies = {'http': None, 'https': None}
+        response = session.get(url)
         response.raise_for_status()
         response.encoding = 'utf-8'
         json_text = response.text.strip().lstrip('\ufeff')
@@ -249,12 +252,6 @@ def async_download_image(url, filename, name_type=0):
         }
 async def loca_download_image(url, filename, name_type=0):
     
-    http_proxy = os.environ.get('http_proxy', '')
-    https_proxy = os.environ.get('https_proxy', '')
-    no_proxy = os.environ.get('no_proxy', '*')
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = '*'
     dir_name = folder_paths.get_input_directory()
     no_proxy_handler = urllib.request.ProxyHandler({})
     opener = urllib.request.build_opener(no_proxy_handler)
@@ -265,9 +262,6 @@ async def loca_download_image(url, filename, name_type=0):
     try:
         full_path = os.path.join(dir_name, file_new_name)
         if os.path.exists(full_path):
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
@@ -276,25 +270,16 @@ async def loca_download_image(url, filename, name_type=0):
         if response.getcode() == 200:
             with open(full_path, 'wb') as f:
                 f.write(response.read())
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
             }
         else:
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': False,
                 'filename': file_new_name,
             }
     except Exception as e:
-        os.environ['http_proxy'] = http_proxy
-        os.environ['https_proxy'] = https_proxy
-        os.environ['no_proxy'] = no_proxy
         return {
             'code': False,
             'filename': file_new_name,
@@ -531,7 +516,10 @@ def send_binary_data_async(upload_url, file_path, is_binary=False, mime_type='im
         else:
             with open(file_path, 'rb') as file:
                 binary_data = file.read()
-        response = requests.put(upload_url, data=binary_data, headers=headers)
+        session = requests.Session()
+        session.trust_env = False
+        session.proxies = {'http': None, 'https': None}
+        response = session.put(upload_url, data=binary_data, headers=headers)
         if response.status_code == 200:
             return True, ''
         else:

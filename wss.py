@@ -113,12 +113,6 @@ class UploadManager:
     def start_sync(self):
         tasks = self.prepare_tasks()
         results = []
-        http_proxy = os.environ.get('http_proxy', '')
-        https_proxy = os.environ.get('https_proxy', '')
-        no_proxy = os.environ.get('no_proxy', '*')
-        os.environ['http_proxy'] = ''
-        os.environ['https_proxy'] = ''
-        os.environ['no_proxy'] = '*'
         with ThreadPoolExecutor(max_workers=15) as executor1:
             futures = {executor1.submit(self.upload_task, *task): task for task in tasks}
             for future in as_completed(futures):
@@ -130,14 +124,8 @@ class UploadManager:
                         self.url_result['data']['data'][index]['url'] = cleaned_url
                     results.append((cleaned_url, index, is_sub_url, key))
                 except Exception as e:
-                    os.environ['http_proxy'] = http_proxy
-                    os.environ['https_proxy'] = https_proxy
-                    os.environ['no_proxy'] = no_proxy
                     raise Exception(str(e)+cleaned_url)
                     pass
-        os.environ['http_proxy'] = http_proxy
-        os.environ['https_proxy'] = https_proxy
-        os.environ['no_proxy'] = no_proxy
         return results
     def get(self):
         for index, item1 in enumerate(self.url_result['data']['data']):

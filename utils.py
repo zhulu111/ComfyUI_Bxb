@@ -133,7 +133,19 @@ def download_ffmpeg(target_dir):
     file_extension = url.split('.')[-1]
     archive_path = target_dir / f"ffmpeg-{plat}.{file_extension}"
     print(f"正在下载 FFmpeg for {plat}...")
-    urllib.request.urlretrieve(url, archive_path, reporthook)
+    no_proxy_handler = urllib.request.ProxyHandler({})
+    opener = urllib.request.build_opener(no_proxy_handler)
+    with opener.open(url) as response:
+        with open(archive_path, 'wb') as out_file:
+            block_size = 8192
+            total_size = int(response.headers.get('Content-Length', 0))
+            reporthook(0, block_size, total_size)
+            while True:
+                buffer = response.read(block_size)
+                if not buffer:
+                    break
+                out_file.write(buffer)
+                reporthook(len(buffer) // block_size, block_size, total_size)
     print(f"正在解压 FFmpeg...")
     extracted_dir = target_dir / "ffmpeg"
     if file_extension == "zip":
