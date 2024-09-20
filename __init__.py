@@ -347,6 +347,12 @@ async def download_fileloadd(request):
 async def process_download_tasks(yu_load_images):
     
     loop = asyncio.get_event_loop()
+    http_proxy = os.environ.get('http_proxy', '')
+    https_proxy = os.environ.get('https_proxy', '')
+    no_proxy = os.environ.get('no_proxy', '*')
+    os.environ['http_proxy'] = ''
+    os.environ['https_proxy'] = ''
+    os.environ['no_proxy'] = '*'
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         download_tasks = []
         for image_info in yu_load_images:
@@ -374,6 +380,9 @@ async def process_download_tasks(yu_load_images):
                 }
             else:
                 image_info['right_image'] = ''
+    os.environ['http_proxy'] = http_proxy
+    os.environ['https_proxy'] = https_proxy
+    os.environ['no_proxy'] = no_proxy
     return yu_load_images
 def process_zhutu(image_info, base_image1, base_image2, base_image3):
     

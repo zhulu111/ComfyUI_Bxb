@@ -215,12 +215,6 @@ def generate_large_random_number(num_bits):
     return random.getrandbits(num_bits)
 def async_download_image(url, filename, name_type=0):
     
-    http_proxy = os.environ.get('http_proxy', '')
-    https_proxy = os.environ.get('https_proxy', '')
-    no_proxy = os.environ.get('no_proxy', '*')
-    os.environ['http_proxy'] = ''
-    os.environ['https_proxy'] = ''
-    os.environ['no_proxy'] = '*'
     dir_name = folder_paths.get_input_directory()
     no_proxy_handler = urllib.request.ProxyHandler({})
     opener = urllib.request.build_opener(no_proxy_handler)
@@ -231,9 +225,6 @@ def async_download_image(url, filename, name_type=0):
     try:
         full_path = os.path.join(dir_name, file_new_name)
         if os.path.exists(full_path):
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
@@ -242,25 +233,16 @@ def async_download_image(url, filename, name_type=0):
         if response.getcode() == 200:
             with open(full_path, 'wb') as f:
                 f.write(response.read())
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': True,
                 'filename': file_new_name,
             }
         else:
-            os.environ['http_proxy'] = http_proxy
-            os.environ['https_proxy'] = https_proxy
-            os.environ['no_proxy'] = no_proxy
             return {
                 'code': False,
                 'filename': file_new_name,
             }
     except Exception as e:
-        os.environ['http_proxy'] = http_proxy
-        os.environ['https_proxy'] = https_proxy
-        os.environ['no_proxy'] = no_proxy
         return {
             'code': False,
             'filename': file_new_name,
