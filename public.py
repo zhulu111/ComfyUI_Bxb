@@ -28,7 +28,7 @@ try:
 except AttributeError:
     resample_filter = Image.ANTIALIAS
 def get_address():
-    return args.listen if args.listen != '0.0.0.0' else '127.0.0.1'
+    return args.listen if '0.0.0.0' not in args.listen else '127.0.0.1'
 def get_port():
     return args.port
 VERSION = '2.0.0'
