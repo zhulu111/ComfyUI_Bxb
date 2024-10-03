@@ -209,6 +209,7 @@ def is_valid_exe(exe):
     except Exception:
         return False
 from io import BytesIO
+import piexif
 def get_image_dimensions(input_file, custom_data=None):
     with Image.open(input_file) as img:
         width, height = img.size
@@ -226,11 +227,12 @@ def get_image_dimensions(input_file, custom_data=None):
                 meta.add_text(key, value)
             img.save(img_byte_arr, format="PNG", pnginfo=meta)
         elif img_format == 'JPEG':
-            img = img.convert("RGB")
-            exif_dict = {}
+            img = img.convert("RGB")  
+            exif_dict = {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None}
             for key, value in custom_data.items():
-                exif_dict[key] = value
-            img.save(img_byte_arr, format="JPEG", exif=exif_dict)
+                exif_dict["0th"][piexif.ImageIFD.Make] = str(value)
+            exif_bytes = piexif.dump(exif_dict)
+            img.save(img_byte_arr, format="JPEG", exif=exif_bytes)
         img_byte_arr.seek(0)
         image_bytes = img_byte_arr.getvalue()
         with open(input_file, "wb") as f:

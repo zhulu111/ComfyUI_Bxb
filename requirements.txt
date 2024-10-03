@@ -6,3 +6,4 @@ websockets
 aiohttp-cors
 requests
 numpy
+piexif
