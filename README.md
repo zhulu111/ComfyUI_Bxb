@@ -9,6 +9,12 @@ https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copyli
 ![Intro Image](assets/lxwm.jpg) 
 ## 更新记录 
 ### 已更新
+2025.02.05：  
+1、新增快手端小程序；   
+2、新增遮罩编辑编辑功能；    
+3、新增重新生成功能，用户点击重新生成后，复用之前的输入；  
+4、修复与新版ComfyUI样式兼容问题；    
+
 2024.10.26：  
 1、新增抖音小程序iOS端支付功能（钻石支付）；   
 2、新增微信小程序iOS端支付功能（跳转客服消息，自动回复访问入口）；  
@@ -70,7 +76,6 @@ https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copyli
 注意：模型路径等信息在不同的GPU服务器上要保持一致
 ### 计划中   
 1、增加供普通用户使用的PC端；  
-2、增加看广告获取生图算力的功能；  
 ## 安装方式
 1、通过ComfyUI-Manager在线安装，在ComfyUI-Manager中搜索“ComfyUI_Bxb”即可找到本插件（推荐）；  
 2、通过git clone下载插件包，放到ComfyUI/custom_nodes目录下，重启ComfyUI即可安装本插件；  
