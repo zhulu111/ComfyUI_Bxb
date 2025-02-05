@@ -23,7 +23,7 @@ def is_websocket_connected(websocket_conn):
         return websocket_conn.state == 1
 import threading
 from .public import (get_output, write_json_to_file, get_address, get_port, get_port_from_cmdline, args, \
-                     find_project_root, get_workflow, get_base_url, get_filenames, read_json_file,
+                     find_project_root, get_workflow, get_base_url, get_filenames, read_json_file,merge_alpha_channels,
                      generate_large_random_number, generate_md5_uid_timestamp_filename, loca_download_image, print_exception_in_chinese, determine_file_type, get_upload_url, send_binary_data, remove_query_parameters, combine_images, send_binary_data_async, find_project_custiom_nodes_path)
 from .utils import get_video_dimensions, get_image_dimensions, extract_frames
 import folder_paths
@@ -606,7 +606,9 @@ def queue_prompt(prompt, workflow, new_client_id):
         print_exception_in_chinese(e)
         return {}
 def find_element_by_key(array, key):
-    key_int = int(key)
+    key_int = key
+    if ":" not in key_int:
+        key_int = int(key_int)
     for index, element in enumerate(array):
         if element.get('id') == key_int:
             return element, index
@@ -653,6 +655,14 @@ async def process_json_elements(json_data, prompt_data, workflow, jilu_id):
                         if not download_status:
                             raise Exception('图片下载失败')
                         json_data[item['options']['node']]['inputs'][item['options']['name']] = file_new_name
+                        if item.get('mask_value',''):
+                            mask_value_filename = os.path.basename(item['mask_value'])
+                            mask_value_download_info = await loca_download_image(item['mask_value'], mask_value_filename)
+                            mask_value_download_status = mask_value_download_info['code']
+                            mask_value_file_new_name = mask_value_download_info['filename']
+                            if not mask_value_download_status:
+                                raise Exception('图片下载失败')
+                            json_data[item['options']['node']]['inputs'][item['options']['name']] = merge_alpha_channels(folder_paths.get_input_directory()+ '/' +file_new_name,folder_paths.get_input_directory()+ '/' + mask_value_file_new_name)
                 else:
                     json_data[item['options']['node']]['inputs'][item['options']['name']] = item['custom_value']
             pass

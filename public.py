@@ -1,5 +1,6 @@
 import hashlib
 import os
+import numpy as np
 import aiohttp
 import folder_paths
 from PIL import Image
@@ -528,3 +529,15 @@ def send_binary_data_async(upload_url, file_path, is_binary=False, mime_type='im
     except Exception as e:
         error_message = f"An error occurred while uploading the file: {str(e)}"
         return False, error_message
+def merge_alpha_channels(a_img_path, b_img_path):
+    a_img = Image.open(a_img_path).convert("RGBA")
+    b_img = Image.open(b_img_path).convert("RGBA")
+    b_a_channel = np.array(b_img)[:, :, 3]
+    a_img = a_img.resize(b_img.size, resample_filter)
+    a_img_data = np.array(a_img)
+    a_img_data[:, :, 3] = np.where(b_a_channel == 255, 0, a_img_data[:, :, 3])
+    base_name = os.path.basename(a_img_path)
+    c_img_path = os.path.join(os.path.dirname(a_img_path), f"new_{base_name}.png")
+    new_a_img = Image.fromarray(a_img_data)
+    new_a_img.save(c_img_path, format="PNG")
+    return c_img_path

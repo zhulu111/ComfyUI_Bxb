@@ -17,6 +17,7 @@ from pathlib import Path
 import ssl
 import mimetypes
 import imghdr
+import piexif
 from .public import args, find_project_root, generate_md5_uid_timestamp, determine_file_type, find_project_custiom_nodes_path
 import folder_paths
 from concurrent.futures import ThreadPoolExecutor
@@ -209,7 +210,6 @@ def is_valid_exe(exe):
     except Exception:
         return False
 from io import BytesIO
-import piexif
 def get_image_dimensions(input_file, custom_data=None):
     with Image.open(input_file) as img:
         width, height = img.size
@@ -227,7 +227,7 @@ def get_image_dimensions(input_file, custom_data=None):
                 meta.add_text(key, value)
             img.save(img_byte_arr, format="PNG", pnginfo=meta)
         elif img_format == 'JPEG':
-            img = img.convert("RGB")  
+            img = img.convert("RGB")
             exif_dict = {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None}
             for key, value in custom_data.items():
                 exif_dict["0th"][piexif.ImageIFD.Make] = str(value)
