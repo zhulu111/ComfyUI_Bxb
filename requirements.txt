@@ -2,7 +2,7 @@ Pillow
 tqdm
 aiohttp
 filetype
-websockets<=14
+websockets<15.0.0
 aiohttp-cors
 requests
 numpy
