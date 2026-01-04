@@ -1,12 +1,47 @@
 # SD变现宝
+
+## 🚨 紧急重要通知：云服务停止与商业版升级
+
+> **⚠️ 请所有用户仔细阅读以下变更通知**
+
+### 1. 免费版云服务停止公告
+因公司运营策略变更，平台将于 **2026年1月10日** 正式停止免费版 `ComfyUI_Bxb` 插件的云服务。
+
+* **服务影响**：
+    * 停止后，插件将无法正常使用，图片/视频等资源的安全校验能力失效。
+    * 为保障安全，我们将同步禁用所有资源类上传功能，涉及上传素材的流程将不可用。
+    * 充值/购买接口已关闭。
+* **退款说明**：
+    * 如您有剩余算力，请前往小程序 **「我的 → 联系我们」** 提交退款申请，我们将尽快处理。
+* **数据安全**：
+    * 您的历史工作流保存在本地插件端 `config` 文件夹内，不会因本次调整丢失。
+    * 商家提现接口仍可正常使用。
+
+---
+
+### 2. 🔥 全新商业版上线（私有化部署）
+为了提供更稳定、强大的服务，我们已推出 **SD变现宝商业版（私有化部署版）**。
+
+* **全新架构**：代码重构，支持云GPU，性能更强。
+* **多端覆盖**：完美支持 **微信小程序 / H5 / PC / 抖音小程序 / 快手小程序**。
+* **完全掌控**：域名授权，支持二次开发与个性化扩展，数据握在自己手中。
+
+👉 **立即升级商业版 / 获取源码**： [https://code.sdbxb.com](https://code.sdbxb.com)
+
+---
+---
+
 ## 插件功能
 SD变现宝插件可以一键把comfyui工作流转为“微信小程序”、“抖音小程序”、“微信内H5”、“快手小程序”，且都支持支付变现。  
 在您现有工作流的基础上，加入ComfyUI_Bxb插件， 即可实现一键转换。
+
 ## 使用教程   
 https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copylink
+
 ## 特别说明
 ### 如在使用过程中出现问题，或者您有意见或者建议都请联系我。  
 ![Intro Image](assets/lxwm.jpg) 
+
 ## 更新记录 
 ### 已更新
 2025.02.05：  
@@ -74,12 +109,15 @@ https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copyli
 2024.6.23：  
 已支持多GPU服务器并发。保存工作流，然后在不同的GPU服务器上点击一键转换，即可实现一个作品对应多个GPU服务器；  
 注意：模型路径等信息在不同的GPU服务器上要保持一致
+
 ### 计划中   
 1、增加供普通用户使用的PC端；  
+
 ## 安装方式
 1、通过ComfyUI-Manager在线安装，在ComfyUI-Manager中搜索“ComfyUI_Bxb”即可找到本插件（推荐）；  
 2、通过git clone下载插件包，放到ComfyUI/custom_nodes目录下，重启ComfyUI即可安装本插件；  
 3、官方QQ群：967073981，下载插件包，放到ComfyUI/custom_nodes目录下，重启ComfyUI即可安装本插件；  
+
 ## 使用示例和截屏说明
 ### ComfyUI插件端截屏
 ![Intro Image](assets/01.png) 
@@ -91,4 +129,4 @@ https://dcn92p748woz.feishu.cn/wiki/Gufowb2pwi4iK2ks3oRcLZBqnrg?from=from_copyli
 ![Intro Image](assets/07.png) 
 ![Intro Image](assets/08.png) 
 ![Intro Image](assets/09.png) 
-![Intro Image](assets/10.png) 
+![Intro Image](assets/10.png)
